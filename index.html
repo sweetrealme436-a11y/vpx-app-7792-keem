@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#6c63ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MyDash">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>แดชบอร์ดส่วนตัว</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --card: #1a1a26;
+  --accent: #6c63ff;
+  --accent2: #00d4aa;
+  --accent3: #ff6b6b;
+  --gold: #ffd700;
+  --text: #e8e8f0;
+  --muted: #6b6b8a;
+  --border: #2a2a3a;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans Thai', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.07) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(0,212,170,0.05) 0%, transparent 50%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Layout */
+.app { display:flex; flex-direction:column; height:100vh; position:relative; z-index:1; }
+.header {
+  flex-shrink:0;
+  padding: 48px 20px 14px;
+  background: linear-gradient(180deg, rgba(108,99,255,0.12) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border);
+}
+.header-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.greeting { font-size:12px; color:var(--muted); font-family:'Space Mono',monospace; letter-spacing:1px; }
+.name-display {
+  font-size:20px; font-weight:700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.avatar-btn {
+  width:42px; height:42px; border-radius:50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; cursor:pointer; border:none; flex-shrink:0;
+}
+.time-display { font-family:'Space Mono',monospace; font-size:30px; font-weight:700; letter-spacing:-1px; }
+.date-display { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* Nav tabs */
+.nav {
+  flex-shrink:0;
+  display:flex; gap:6px; padding:12px 16px;
+  overflow-x:auto; scrollbar-width:none;
+  background:var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.nav::-webkit-scrollbar { display:none; }
+.nav-btn {
+  padding:7px 14px; border-radius:20px;
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--muted); font-size:12px;
+  font-family:'Noto Sans Thai',sans-serif;
+  cursor:pointer; white-space:nowrap; transition:all 0.2s;
+}
+.nav-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+/* Scroll area */
+.content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+.section { display:none; padding:14px 16px 100px; }
+.section.active { display:block; }
+
+/* Cards */
+.card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:14px; margin-bottom:12px;
+  animation: fadeUp 0.25s ease;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(6px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.card-title {
+  font-size:10px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:1.5px;
+  font-family:'Space Mono',monospace; margin-bottom:10px;
+}
+.section-header { font-size:17px; font-weight:700; margin-bottom:12px; }
+
+/* Prayer */
+.prayer-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+.prayer-item {
+  background:var(--surface); border-radius:10px; padding:8px 3px;
+  text-align:center; border:1px solid var(--border); transition:all 0.2s; cursor:pointer;
+}
+.prayer-item.done { border-color:var(--accent2); background:rgba(0,212,170,0.1); }
+.prayer-name { font-size:9px; color:var(--muted); margin-bottom:2px; }
+.prayer-time { font-size:10px; font-family:'Space Mono',monospace; }
+.prayer-emoji { font-size:14px; margin-top:3px; }
+
+/* Timeline */
+.timeline { position:relative; padding-left:18px; }
+.timeline::before {
+  content:''; position:absolute; left:5px; top:0; bottom:0;
+  width:1px; background:var(--border);
+}
+.timeline-item { position:relative; padding-bottom:14px; }
+.timeline-item::before {
+  content:''; position:absolute; left:-15px; top:5px;
+  width:8px; height:8px; border-radius:50%;
+  background:var(--border); transition:all 0.3s;
+}
+.timeline-item.current::before { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+.timeline-item.done::before { background:var(--accent); }
+.timeline-time { font-size:10px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:1px; }
+.timeline-task { font-size:13px; }
+.timeline-item.done .timeline-task { color:var(--muted); text-decoration:line-through; }
+
+/* Habits */
+.habit-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+.habit-item:last-child { border-bottom:none; }
+.habit-toggle {
+  width:26px; height:26px; border-radius:7px;
+  border:2px solid var(--border); display:flex;
+  align-items:center; justify-content:center;
+  cursor:pointer; transition:all 0.2s; flex-shrink:0; font-size:14px;
+}
+.habit-toggle.checked { background:var(--accent2); border-color:var(--accent2); }
+.habit-name { font-size:13px; flex:1; }
+.habit-streak { font-size:11px; color:var(--gold); font-family:'Space Mono',monospace; }
+
+/* Goals */
+.goal-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+.goal-item:last-child { border-bottom:none; }
+.goal-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+.goal-text { flex:1; }
+.goal-title { font-size:13px; font-weight:500; }
+.goal-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+.progress-bar { height:3px; background:var(--border); border-radius:2px; margin-top:5px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:2px; transition:width 1s ease; }
+
+/* Profile */
+.profile-item { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
+.profile-item:last-child { border-bottom:none; }
+.profile-label { font-size:12px; color:var(--muted); }
+.profile-value { font-size:12px; font-weight:500; text-align:right; max-width:58%; }
+
+/* Stats */
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; }
+.stat-value {
+  font-size:26px; font-weight:700; font-family:'Space Mono',monospace;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.stat-label { font-size:10px; color:var(--muted); margin-top:3px; }
+
+/* Quote */
+.quote-card {
+  background:linear-gradient(135deg,rgba(108,99,255,0.18),rgba(0,212,170,0.08));
+  border:1px solid rgba(108,99,255,0.3); border-radius:16px;
+  padding:18px; text-align:center; margin-bottom:12px;
+}
+.quote-text { font-size:14px; line-height:1.7; margin-bottom:6px; }
+.quote-source { font-size:11px; color:var(--accent); font-family:'Space Mono',monospace; }
+
+/* Chip */
+.chip {
+  display:inline-block; padding:4px 10px; border-radius:20px;
+  font-size:11px; background:rgba(108,99,255,0.12);
+  color:var(--accent); border:1px solid rgba(108,99,255,0.25); margin:3px 3px 3px 0;
+}
+.chip.green { background:rgba(0,212,170,0.12); color:var(--accent2); border-color:rgba(0,212,170,0.25); }
+
+/* Edit Profile Modal */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:100;
+  background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
+  align-items:flex-end; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:24px 24px 0 0; padding:20px;
+  width:100%; max-width:430px; max-height:85vh;
+  overflow-y:auto; animation:slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform:translateY(100%); }
+  to { transform:translateY(0); }
+}
+.modal-title { font-size:17px; font-weight:700; margin-bottom:16px; }
+.modal-close {
+  float:right; background:var(--surface); border:none;
+  color:var(--muted); width:28px; height:28px; border-radius:50%;
+  font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.field { margin-bottom:14px; }
+.field label { font-size:11px; color:var(--muted); display:block; margin-bottom:5px; letter-spacing:0.5px; }
+.field input, .field textarea {
+  width:100%; background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:10px 12px; color:var(--text);
+  font-family:'Noto Sans Thai',sans-serif; font-size:14px; outline:none;
+}
+.field input:focus, .field textarea:focus { border-color:var(--accent); }
+.field textarea { height:70px; resize:none; }
+.save-btn {
+  width:100%; padding:13px; border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none; color:#fff; font-size:15px; font-weight:600;
+  font-family:'Noto Sans Thai',sans-serif; cursor:pointer;
+  margin-top:6px;
+}
+.edit-btn {
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted); padding:6px 14px; border-radius:20px;
+  font-size:12px; cursor:pointer; font-family:'Noto Sans Thai',sans-serif;
+  float:right; margin-top:-2px;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="greeting">สวัสดี,</div>
+        <div class="name-display" id="headerName">กำลังโหลด...</div>
+      </div>
+      <button class="avatar-btn" onclick="openModal()" title="แก้ไขโปรไฟล์">✏️</button>
+    </div>
+    <div class="time-display" id="clock">00:00</div>
+    <div class="date-display" id="dateDisplay">--</div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('today',this)">วันนี้</button>
+    <button class="nav-btn" onclick="showSection('goals',this)">เป้าหมาย</button>
+    <button class="nav-btn" onclick="showSection('habits',this)">นิสัย</button>
+    <button class="nav-btn" onclick="showSection('profile',this)">โปรไฟล์</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- TODAY -->
+    <div class="section active" id="today">
+
+      <div class="card">
+        <div class="card-title">🕌 ละหมาดวันนี้</div>
+        <div class="prayer-grid" id="prayerGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📅 Routine วันนี้</div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div class="quote-card">
+        <div class="quote-text" id="quoteText"></div>
+        <div class="quote-source" id="quoteSource"></div>
+      </div>
+
+    </div>
+
+    <!-- GOALS -->
+    <div class="section" id="goals">
+      <div class="section-header">🎯 เป้าหมายของฉัน</div>
+      <div class="card">
+        <div class="card-title">ระยะสั้น — ช่วงมหา'ลัย</div>
+        <div class="goal-item">
+          <div class="goal-icon" style="background:rgba(108,99,255,0.15)">💪</div>
+          <div class="goal-text">
+            <div class="goal-title">สุขภาพแข็งแรง</div>
+            <div class="goal-sub">ออกกำลังกายทุกวัน เล่นบอลสม่ำเสมอ</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--accent)"></div></div>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-icon" style="background:rgba(0,212,170,0.15)">🎓</div>
+          <div class="goal-text">
+            <div class="goal-title">เรียนดีพอ ไม่เครียดเกิน</div>
+            <div class="goal-sub">เกรดดี มีเวลาชีวิต balance</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:10%;background:var(--accent2)"></div></div>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-icon" style="background:rgba(255,215,0,0.15)">🕌</div>
+          <div class="goal-text">
+            <div class="goal-title">ความรู้ศาสนาอิสลาม</div>
+            <div class="goal-sub">ละหมาด 5 เวลา ท่องจำอัลกุรอาน</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:50%;background:var(--gold)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ระยะยาว — อนาคต</div>
+        <div class="goal-item">
+          <div class="goal-icon" style="background:rgba(255,107,107,0.15)">💰</div>
+          <div class="goal-text">
+            <div class="goal-title">เก็บเงินสู่ขอ 150,000 บาท</div>
+            <div class="goal-sub">เป้าอายุ ~23 ปี / เก็บ 2,500/เดือน</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:2%;background:var(--accent3)"></div></div>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-icon" style="background:rgba(108,99,255,0.15)">📈</div>
+          <div class="goal-text">
+            <div class="goal-title">เริ่มลงทุนหุ้น</div>
+            <div class="goal-sub">เป้าอายุ 20 ปี — ศึกษาก่อนลงมือ</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:5%;background:var(--accent)"></div></div>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-icon" style="background:rgba(0,212,170,0.15)">✈️</div>
+          <div class="goal-text">
+            <div class="goal-title">เที่ยวรอบโลก</div>
+            <div class="goal-sub">ทำงาน AI/โค้ด มีรายได้ดี</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:1%;background:var(--accent2)"></div></div>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-icon" style="background:rgba(255,215,0,0.15)">👨‍👩‍👧</div>
+          <div class="goal-text">
+            <div class="goal-title">แต่งงาน — สร้างครอบครัว</div>
+            <div class="goal-sub">แต่งงานเร็ว สอนลูกเรื่องศาสนา</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:5%;background:var(--gold)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ทักษะที่ต้องพัฒนา</div>
+        <div style="padding-top:4px">
+          <span class="chip">Python</span><span class="chip">AI / ML</span>
+          <span class="chip green">ภาษาอังกฤษ</span><span class="chip green">คณิตศาสตร์</span>
+          <span class="chip">การลงทุน</span><span class="chip green">TikTok</span>
+          <span class="chip">ฟิสิกส์</span><span class="chip green">ฟุตบอล</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HABITS -->
+    <div class="section" id="habits">
+      <div class="section-header">✅ นิสัยประจำวัน</div>
+      <div class="card">
+        <div class="card-title">วันนี้ทำแล้วหรือยัง?</div>
+        <div id="habitList"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">สถิติวันนี้</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="habitCount">0/7</div>
+            <div class="stat-label">นิสัยที่ทำแล้ว</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="prayerCountStat">0/5</div>
+            <div class="stat-label">ละหมาดแล้ว</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="section" id="profile">
+      <div class="section-header">
+        👤 โปรไฟล์ของฉัน
+        <button class="edit-btn" onclick="openModal()">✏️ แก้ไข</button>
+      </div>
+      <div class="card">
+        <div class="card-title">ข้อมูลส่วนตัว</div>
+        <div id="profilePersonal"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">การศึกษา</div>
+        <div id="profileEducation"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">การเงิน</div>
+        <div id="profileFinance"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">ความท้าทาย</div>
+        <div id="profileChallenges"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">
+      ✏️ แก้ไขโปรไฟล์
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="field"><label>ชื่อ / ชื่อเล่น</label><input id="f-name" type="text" placeholder="ชื่อของคุณ"></div>
+    <div class="field"><label>อายุ</label><input id="f-age" type="text" placeholder="เช่น 18 ปี 5 เดือน"></div>
+    <div class="field"><label>มหาวิทยาลัย</label><input id="f-uni" type="text" placeholder="เช่น ม.วลัยลักษณ์"></div>
+    <div class="field"><label>คณะ / สาขา</label><input id="f-faculty" type="text" placeholder="เช่น วิศวกรรมคอมพิวเตอร์ & AI"></div>
+    <div class="field"><label>ศาสนา</label><input id="f-religion" type="text" placeholder="เช่น อิสลาม"></div>
+    <div class="field"><label>เงินเก็บปัจจุบัน</label><input id="f-savings" type="text" placeholder="เช่น 2,000 บาท"></div>
+    <div class="field"><label>แหล่งรายได้</label><input id="f-income" type="text" placeholder="เช่น TikTok + ปักตะกร้า"></div>
+    <div class="field"><label>เป้าหมายเงิน</label><input id="f-moneygoal" type="text" placeholder="เช่น 150,000 บาท (สู่ขอ)"></div>
+    <div class="field"><label>โน้ตส่วนตัว / สิ่งที่กำลังทำ</label><textarea id="f-notes" placeholder="บันทึกอะไรก็ได้ที่อยากจำ..."></textarea></div>
+    <button class="save-btn" onclick="saveProfile()">💾 บันทึก</button>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const PRAYERS = [
+  { id:'subh', name:'ซุบฮฺ', time:'05:20' },
+  { id:'zuhr', name:'ซุฮฺร์', time:'12:10' },
+  { id:'asr', name:'อัศร์', time:'15:30' },
+  { id:'maghrib', name:'มัฆริบ', time:'18:20' },
+  { id:'isha', name:'อิชาอ์', time:'19:30' },
+];
+
+const ROUTINE = [
+  { hour:5,    task:'ตื่น — ละหมาดซุบฮฺ' },
+  { hour:5.5,  task:'🏃 วิ่ง / ออกกำลังกาย' },
+  { hour:6.75, task:'📖 อ่านศาสนา / ท่องจำ' },
+  { hour:7.25, task:'💻 อังกฤษ / คณิต / โค้ด' },
+  { hour:8,    task:'📱 ถ่าย TikTok / ปักตะกร้า' },
+  { hour:12,   task:'🕌 ละหมาดซุฮฺร์ — พักเที่ยง' },
+  { hour:13.5, task:'💻 ฝึกโค้ด / อ่านหนังสือ' },
+  { hour:16.5, task:'🕌 ละหมาดอัศร์' },
+  { hour:17,   task:'⚽ เล่นบอล / ออกกำลังกาย' },
+  { hour:19,   task:'🕌 ละหมาดมัฆริบ — กินข้าว' },
+  { hour:20,   task:'❤️ คุยกับแฟน (1 ชั่วโมง)' },
+  { hour:21,   task:'🕌 ละหมาดอิชาอ์ — อัลกุรอาน' },
+  { hour:21.5, task:'💡 เรียนโค้ด / อ่านหนังสือ' },
+  { hour:22.5, task:'😴 นอน' },
+];
+
+const HABITS = [
+  '🏃 ออกกำลังกาย / วิ่ง',
+  '🕌 ละหมาดครบ 5 เวลา',
+  '📖 อ่านอัลกุรอาน',
+  '💻 ฝึกโค้ด / อ่านหนังสือ',
+  '📱 ลงคลิป TikTok',
+  '🌐 ฝึกภาษาอังกฤษ',
+  '⚽ เล่นบอล',
+];
+
+const QUOTES = [
+  { text:'"คนที่ไม่มีวินัยในวันนี้<br>จะไม่มีอิสรภาพในวันพรุ่งนี้"', src:'— แรงบันดาลใจ' },
+  { text:'"إِنَّ مَعَ الْعُسْرِ يُسْرًا<br>หลังความยากลำบาก ย่อมมีความสะดวก"', src:'— อัล-กุรอาน 94:6' },
+  { text:'"เริ่มเล็ก ทำสม่ำเสมอ<br>ผลลัพธ์ยิ่งใหญ่จะตามมาเอง"', src:'— หลักพัฒนาตัวเอง' },
+  { text:'"ทุกผู้เชี่ยวชาญ<br>เคยเป็นมือใหม่มาก่อน"', src:'— แรงบันดาลใจ' },
+  { text:'"الوقت كالسيف إن لم تقطعه قطعك<br>เวลาเหมือนดาบ ถ้าไม่ใช้มัน มันจะตัดคุณ"', src:'— ภาษิตอาหรับ' },
+];
+
+// Default profile
+const DEFAULT_PROFILE = {
+  name: 'น้องน้อย',
+  age: '18 ปี 5 เดือน',
+  uni: 'ม.วลัยลักษณ์',
+  faculty: 'วิศวกรรมคอมพิวเตอร์ & AI',
+  religion: 'อิสลาม',
+  savings: '~2,000 บาท',
+  income: 'TikTok + ปักตะกร้า',
+  moneygoal: '150,000 บาท (สู่ขอ)',
+  notes: '',
+};
+
+// ========== STATE ==========
+let profile = JSON.parse(localStorage.getItem('profile') || JSON.stringify(DEFAULT_PROFILE));
+let prayerState = JSON.parse(localStorage.getItem('prayerState_' + today()) || '{}');
+let habitState = JSON.parse(localStorage.getItem('habitState_' + today()) || '{}');
+
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+// ========== CLOCK ==========
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m;
+  const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  document.getElementById('dateDisplay').textContent =
+    `วัน${days[now.getDay()]}ที่ ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
+  updateTimeline(now.getHours() + now.getMinutes()/60);
+}
+setInterval(updateClock, 10000);
+
+// ========== RENDER ==========
+function renderAll() {
+  document.getElementById('headerName').textContent = profile.name || 'แดชบอร์ดของฉัน';
+  renderPrayers();
+  renderTimeline();
+  renderHabits();
+  renderProfile();
+  renderQuote();
+  updateClock();
+}
+
+function renderPrayers() {
+  const grid = document.getElementById('prayerGrid');
+  grid.innerHTML = PRAYERS.map(p => {
+    const done = prayerState[p.id];
+    return `<div class="prayer-item${done?' done':''}" onclick="togglePrayer('${p.id}')">
+      <div class="prayer-name">${p.name}</div>
+      <div class="prayer-time">${p.time}</div>
+      <div class="prayer-emoji">${done ? '✅' : '⬜'}</div>
+    </div>`;
+  }).join('');
+  updatePrayerStat();
+}
+
+function togglePrayer(id) {
+  prayerState[id] = !prayerState[id];
+  localStorage.setItem('prayerState_' + today(), JSON.stringify(prayerState));
+  renderPrayers();
+}
+
+function updatePrayerStat() {
+  const count = Object.values(prayerState).filter(Boolean).length;
+  document.getElementById('prayerCountStat').textContent = count + '/5';
+}
+
+function renderTimeline() {
+  const currentHour = new Date().getHours() + new Date().getMinutes()/60;
+  const tl = document.getElementById('timeline');
+  let currentSet = false;
+  tl.innerHTML = ROUTINE.map((item, i) => {
+    const nextHour = ROUTINE[i+1] ? ROUTINE[i+1].hour : 24;
+    let cls = '';
+    if (currentHour >= nextHour) cls = 'done';
+    else if (currentHour >= item.hour && !currentSet) { cls = 'current'; currentSet = true; }
+    const hh = String(Math.floor(item.hour)).padStart(2,'0');
+    const mm = String(Math.round((item.hour % 1) * 60)).padStart(2,'0');
+    return `<div class="timeline-item ${cls}">
+      <div class="timeline-time">${hh}:${mm}</div>
+      <div class="timeline-task">${item.task}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateTimeline(h) { renderTimeline(); }
+
+function renderHabits() {
+  const list = document.getElementById('habitList');
+  list.innerHTML = HABITS.map((habit, i) => {
+    const checked = habitState[i];
+    return `<div class="habit-item">
+      <div class="habit-toggle ${checked?'checked':''}" onclick="toggleHabit(${i})">${checked?'✓':''}</div>
+      <div class="habit-name">${habit}</div>
+      <div class="habit-streak">🔥 ${checked?1:0}</div>
+    </div>`;
+  }).join('');
+  updateHabitStat();
+}
+
+function toggleHabit(i) {
+  habitState[i] = !habitState[i];
+  localStorage.setItem('habitState_' + today(), JSON.stringify(habitState));
+  renderHabits();
+}
+
+function updateHabitStat() {
+  const count = Object.values(habitState).filter(Boolean).length;
+  document.getElementById('habitCount').textContent = count + '/' + HABITS.length;
+}
+
+function renderProfile() {
+  document.getElementById('profilePersonal').innerHTML = `
+    <div class="profile-item"><div class="profile-label">ชื่อ</div><div class="profile-value">${profile.name}</div></div>
+    <div class="profile-item"><div class="profile-label">อายุ</div><div class="profile-value">${profile.age}</div></div>
+    <div class="profile-item"><div class="profile-label">ศาสนา</div><div class="profile-value">${profile.religion}</div></div>
+    ${profile.notes ? `<div class="profile-item"><div class="profile-label">โน้ต</div><div class="profile-value">${profile.notes}</div></div>` : ''}
+  `;
+  document.getElementById('profileEducation').innerHTML = `
+    <div class="profile-item"><div class="profile-label">มหา'ลัย</div><div class="profile-value">${profile.uni}</div></div>
+    <div class="profile-item"><div class="profile-label">คณะ/สาขา</div><div class="profile-value">${profile.faculty}</div></div>
+  `;
+  document.getElementById('profileFinance').innerHTML = `
+    <div class="profile-item"><div class="profile-label">เงินเก็บ</div><div class="profile-value">${profile.savings}</div></div>
+    <div class="profile-item"><div class="profile-label">รายได้</div><div class="profile-value">${profile.income}</div></div>
+    <div class="profile-item"><div class="profile-label">เป้าหมายเงิน</div><div class="profile-value">${profile.moneygoal}</div></div>
+  `;
+  document.getElementById('profileChallenges').innerHTML = `
+    <div class="profile-item"><div class="profile-label">ปัญหาหลัก</div><div class="profile-value">วินัยไม่ต่อเนื่อง</div></div>
+    <div class="profile-item"><div class="profile-label">ความกังวล</div><div class="profile-value">ตามโลก AI ไม่ทัน</div></div>
+    <div class="profile-item"><div class="profile-label">กำลังพัฒนา</div><div class="profile-value">นิสัยประจำวัน</div></div>
+  `;
+}
+
+function renderQuote() {
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  document.getElementById('quoteText').innerHTML = q.text;
+  document.getElementById('quoteSource').textContent = q.src;
+}
+setInterval(renderQuote, 12000);
+
+// ========== NAV ==========
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ========== MODAL ==========
+function openModal() {
+  document.getElementById('f-name').value = profile.name || '';
+  document.getElementById('f-age').value = profile.age || '';
+  document.getElementById('f-uni').value = profile.uni || '';
+  document.getElementById('f-faculty').value = profile.faculty || '';
+  document.getElementById('f-religion').value = profile.religion || '';
+  document.getElementById('f-savings').value = profile.savings || '';
+  document.getElementById('f-income').value = profile.income || '';
+  document.getElementById('f-moneygoal').value = profile.moneygoal || '';
+  document.getElementById('f-notes').value = profile.notes || '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function saveProfile() {
+  profile = {
+    name: document.getElementById('f-name').value || DEFAULT_PROFILE.name,
+    age: document.getElementById('f-age').value || DEFAULT_PROFILE.age,
+    uni: document.getElementById('f-uni').value || DEFAULT_PROFILE.uni,
+    faculty: document.getElementById('f-faculty').value || DEFAULT_PROFILE.faculty,
+    religion: document.getElementById('f-religion').value || DEFAULT_PROFILE.religion,
+    savings: document.getElementById('f-savings').value || DEFAULT_PROFILE.savings,
+    income: document.getElementById('f-income').value || DEFAULT_PROFILE.income,
+    moneygoal: document.getElementById('f-moneygoal').value || DEFAULT_PROFILE.moneygoal,
+    notes: document.getElementById('f-notes').value,
+  };
+  localStorage.setItem('profile', JSON.stringify(profile));
+  closeModal();
+  renderAll();
+}
+
+// ========== PWA ==========
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ========== INIT ==========
+renderAll();
+</script>
+</body>
+</html>
