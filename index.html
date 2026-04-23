@@ -3,360 +3,291 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#6c63ff">
+<meta name="theme-color" content="#ff6b35">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MyDash">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="IMG_7528.jpeg">
-<title>แดชบอร์ดส่วนตัว</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>MyDash</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Kanit:wght@400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0a0f;
-  --surface: #12121a;
-  --card: #1a1a26;
-  --accent: #6c63ff;
-  --accent2: #00d4aa;
-  --accent3: #ff6b6b;
-  --gold: #ffd700;
-  --text: #e8e8f0;
-  --muted: #6b6b8a;
-  --border: #2a2a3a;
+  --bg:#0f0c1a; --surface:#1a1530; --card:#201b38; --card2:#251f40;
+  --accent:#ff6b35; --accent2:#00e5b0; --accent3:#7c5cfc;
+  --pink:#ff4fa3; --gold:#ffc843; --blue:#4fc3f7;
+  --text:#f0eeff; --muted:#7a7599; --border:#2e2850;
 }
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; overflow:hidden; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Noto Sans Thai', sans-serif;
-  display: flex;
-  flex-direction: column;
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Sarabun',sans-serif;display:flex;flex-direction:column;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 600px 400px at 10% 0%,rgba(124,92,252,.18) 0%,transparent 60%),
+    radial-gradient(ellipse 500px 500px at 90% 100%,rgba(255,107,53,.12) 0%,transparent 60%),
+    radial-gradient(ellipse 400px 300px at 50% 50%,rgba(0,229,176,.06) 0%,transparent 60%);
 }
-body::before {
-  content:'';
-  position:fixed;
-  inset:0;
-  background: radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.07) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 80%, rgba(0,212,170,0.05) 0%, transparent 50%);
-  pointer-events:none;
-  z-index:0;
-}
+.app{display:flex;flex-direction:column;height:100vh;position:relative;z-index:1;}
 
-/* Layout */
-.app { display:flex; flex-direction:column; height:100vh; position:relative; z-index:1; }
-.header {
-  flex-shrink:0;
-  padding: 48px 20px 14px;
-  background: linear-gradient(180deg, rgba(108,99,255,0.12) 0%, transparent 100%);
-  border-bottom: 1px solid var(--border);
-}
-.header-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
-.greeting { font-size:12px; color:var(--muted); font-family:'Space Mono',monospace; letter-spacing:1px; }
-.name-display {
-  font-size:20px; font-weight:700;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.avatar-btn {
-  width:42px; height:42px; border-radius:50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display:flex; align-items:center; justify-content:center;
-  font-size:20px; cursor:pointer; border:none; flex-shrink:0;
-}
-.time-display { font-family:'Space Mono',monospace; font-size:30px; font-weight:700; letter-spacing:-1px; }
-.date-display { font-size:11px; color:var(--muted); margin-top:2px; }
+/* HEADER */
+.header{flex-shrink:0;padding:52px 20px 14px;}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.greeting{font-size:12px;color:var(--muted);font-family:'Prompt',sans-serif;font-weight:300;letter-spacing:.5px;}
+.user-name{font-size:26px;font-weight:700;font-family:'Kanit',sans-serif;
+  background:linear-gradient(135deg,#ff6b35,#ffc843);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;}
+.header-right{display:flex;gap:8px;align-items:center;}
+.streak-badge{display:flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,rgba(255,200,67,.2),rgba(255,107,53,.15));
+  border:1px solid rgba(255,200,67,.4);border-radius:20px;padding:6px 12px;cursor:pointer;}
+.streak-fire{font-size:18px;animation:flicker 1.5s ease infinite;}
+@keyframes flicker{0%,100%{transform:scale(1) rotate(-2deg);}50%{transform:scale(1.1) rotate(2deg);}}
+.streak-num{font-size:15px;font-weight:700;font-family:'Kanit',sans-serif;color:var(--gold);}
+.avatar-btn{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent3),var(--pink));
+  display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:none;box-shadow:0 4px 15px rgba(124,92,252,.4);}
+.time-display{font-family:'Kanit',sans-serif;font-size:46px;font-weight:700;letter-spacing:-2px;line-height:1;
+  background:linear-gradient(135deg,#fff,rgba(255,255,255,.7));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.date-display{font-size:12px;color:var(--muted);font-family:'Prompt',sans-serif;font-weight:300;margin-top:2px;}
 
-/* Nav tabs */
-.nav {
-  flex-shrink:0;
-  display:flex; gap:6px; padding:12px 16px;
-  overflow-x:auto; scrollbar-width:none;
-  background:var(--bg);
-  border-bottom: 1px solid var(--border);
-}
-.nav::-webkit-scrollbar { display:none; }
-.nav-btn {
-  padding:7px 14px; border-radius:20px;
-  border:1px solid var(--border); background:var(--surface);
-  color:var(--muted); font-size:12px;
-  font-family:'Noto Sans Thai',sans-serif;
-  cursor:pointer; white-space:nowrap; transition:all 0.2s;
-}
-.nav-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+/* NAV */
+.nav{flex-shrink:0;display:flex;gap:6px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{padding:8px 16px;border-radius:22px;border:1px solid var(--border);background:var(--surface);
+  color:var(--muted);font-size:14px;font-weight:500;font-family:'Sarabun',sans-serif;cursor:pointer;white-space:nowrap;transition:all .25s;flex-shrink:0;}
+.nav-btn.active{background:linear-gradient(135deg,var(--accent),#ff9a5c);border-color:transparent;color:#fff;box-shadow:0 4px 15px rgba(255,107,53,.4);}
 
-/* Scroll area */
-.content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
-.section { display:none; padding:14px 16px 100px; }
-.section.active { display:block; }
+/* CONTENT */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.section{display:none;padding:14px 16px 100px;}
+.section.active{display:block;}
 
-/* Cards */
-.card {
-  background:var(--card); border:1px solid var(--border);
-  border-radius:16px; padding:14px; margin-bottom:12px;
-  animation: fadeUp 0.25s ease;
-}
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(6px); }
-  to { opacity:1; transform:translateY(0); }
-}
-.card-title {
-  font-size:10px; color:var(--muted);
-  text-transform:uppercase; letter-spacing:1.5px;
-  font-family:'Space Mono',monospace; margin-bottom:10px;
-}
-.section-header { font-size:17px; font-weight:700; margin-bottom:12px; }
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:14px;animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.card-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-family:'Prompt',sans-serif;font-weight:300;margin-bottom:12px;}
+.section-header{font-size:20px;font-weight:700;font-family:'Kanit',sans-serif;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
 
-/* Prayer */
-.prayer-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
-.prayer-item {
-  background:var(--surface); border-radius:10px; padding:8px 3px;
-  text-align:center; border:1px solid var(--border); transition:all 0.2s; cursor:pointer;
-}
-.prayer-item.done { border-color:var(--accent2); background:rgba(0,212,170,0.1); }
-.prayer-name { font-size:9px; color:var(--muted); margin-bottom:2px; }
-.prayer-time { font-size:10px; font-family:'Space Mono',monospace; }
-.prayer-emoji { font-size:14px; margin-top:3px; }
+/* CURRENT TASK */
+.current-card{background:linear-gradient(135deg,rgba(124,92,252,.25),rgba(255,107,53,.15));
+  border:1px solid rgba(124,92,252,.4);border-radius:24px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.current-card::before{content:'';position:absolute;top:-30%;right:-10%;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,92,252,.2),transparent);pointer-events:none;}
+.cur-label{font-size:10px;color:var(--accent3);letter-spacing:2px;font-family:'Prompt',sans-serif;font-weight:500;margin-bottom:4px;}
+.cur-time{font-size:36px;font-weight:700;font-family:'Kanit',sans-serif;color:#fff;line-height:1;}
+.cur-task{font-size:18px;font-weight:600;margin-top:4px;}
+.next-wrap{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);}
+.next-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-bottom:4px;font-family:'Prompt',sans-serif;}
+.next-row{display:flex;align-items:center;gap:8px;}
+.next-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;}
+.next-task{font-size:14px;color:var(--accent2);font-weight:500;flex:1;}
+.next-time{font-size:12px;color:var(--muted);font-family:'Prompt',sans-serif;}
 
-/* Timeline */
-.timeline { position:relative; padding-left:18px; }
-.timeline::before {
-  content:''; position:absolute; left:5px; top:0; bottom:0;
-  width:1px; background:var(--border);
-}
-.timeline-item { position:relative; padding-bottom:14px; }
-.timeline-item::before {
-  content:''; position:absolute; left:-15px; top:5px;
-  width:8px; height:8px; border-radius:50%;
-  background:var(--border); transition:all 0.3s;
-}
-.timeline-item.current::before { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
-.timeline-item.done::before { background:var(--accent); }
-.timeline-time { font-size:10px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:1px; }
-.timeline-task { font-size:13px; }
-.timeline-item.done .timeline-task { color:var(--muted); text-decoration:line-through; }
+/* PRAYER */
+.prayer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.prayer-item{background:var(--surface);border-radius:14px;padding:10px 3px;text-align:center;border:1.5px solid var(--border);cursor:pointer;transition:all .25s;}
+.prayer-item.done{background:rgba(0,229,176,.12);border-color:var(--accent2);}
+.prayer-name{font-size:10px;color:var(--muted);margin-bottom:3px;font-family:'Prompt',sans-serif;}
+.prayer-time{font-size:11px;font-family:'Kanit',sans-serif;font-weight:500;}
+.prayer-emoji{font-size:16px;margin-top:4px;}
 
-/* Habits */
-.habit-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
-.habit-item:last-child { border-bottom:none; }
-.habit-toggle {
-  width:26px; height:26px; border-radius:7px;
-  border:2px solid var(--border); display:flex;
-  align-items:center; justify-content:center;
-  cursor:pointer; transition:all 0.2s; flex-shrink:0; font-size:14px;
-}
-.habit-toggle.checked { background:var(--accent2); border-color:var(--accent2); }
-.habit-name { font-size:13px; flex:1; }
-.habit-streak { font-size:11px; color:var(--gold); font-family:'Space Mono',monospace; }
+/* QUOTE */
+.quote-card{background:linear-gradient(135deg,rgba(255,79,163,.12),rgba(124,92,252,.12));
+  border:1px solid rgba(255,79,163,.25);border-radius:20px;padding:20px;text-align:center;margin-bottom:14px;
+  position:relative;overflow:hidden;cursor:pointer;}
+.quote-card::before{content:'"';position:absolute;top:-10px;left:10px;font-size:80px;color:rgba(255,79,163,.1);font-family:'Kanit',sans-serif;line-height:1;pointer-events:none;}
+.quote-text{font-size:15px;line-height:1.8;color:var(--text);position:relative;z-index:1;}
+.quote-source{font-size:11px;color:var(--pink);margin-top:8px;font-family:'Prompt',sans-serif;}
+.quote-hint{font-size:10px;color:var(--muted);margin-top:4px;font-family:'Prompt',sans-serif;}
 
-/* Goals */
-.goal-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
-.goal-item:last-child { border-bottom:none; }
-.goal-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
-.goal-text { flex:1; }
-.goal-title { font-size:13px; font-weight:500; }
-.goal-sub { font-size:11px; color:var(--muted); margin-top:1px; }
-.progress-bar { height:3px; background:var(--border); border-radius:2px; margin-top:5px; overflow:hidden; }
-.progress-fill { height:100%; border-radius:2px; transition:width 1s ease; }
+/* HABITS */
+.habit-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
+.habit-item:last-child{border-bottom:none;}
+.habit-toggle{width:28px;height:28px;border-radius:9px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;font-size:15px;background:var(--surface);}
+.habit-toggle.checked{background:linear-gradient(135deg,var(--accent2),#00bcd4);border-color:transparent;box-shadow:0 3px 12px rgba(0,229,176,.35);}
+.habit-name{font-size:15px;flex:1;font-weight:400;}
+.habit-streak{font-size:12px;color:var(--gold);font-family:'Kanit',sans-serif;font-weight:600;}
 
-/* Profile */
-.profile-item { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
-.profile-item:last-child { border-bottom:none; }
-.profile-label { font-size:12px; color:var(--muted); }
-.profile-value { font-size:12px; font-weight:500; text-align:right; max-width:58%; }
+/* GOALS */
+.goal-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
+.goal-item:last-child{border-bottom:none;}
+.goal-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.goal-text{flex:1;}
+.goal-title{font-size:14px;font-weight:600;}
+.goal-sub{font-size:12px;color:var(--muted);margin-top:2px;font-family:'Prompt',sans-serif;font-weight:300;}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
 
-/* Stats */
-.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; }
-.stat-value {
-  font-size:26px; font-weight:700; font-family:'Space Mono',monospace;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.stat-label { font-size:10px; color:var(--muted); margin-top:3px; }
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;}
+.stat-value{font-size:30px;font-weight:700;font-family:'Kanit',sans-serif;
+  background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-size:11px;color:var(--muted);margin-top:3px;font-family:'Prompt',sans-serif;}
 
-/* Quote */
-.quote-card {
-  background:linear-gradient(135deg,rgba(108,99,255,0.18),rgba(0,212,170,0.08));
-  border:1px solid rgba(108,99,255,0.3); border-radius:16px;
-  padding:18px; text-align:center; margin-bottom:12px;
-}
-.quote-text { font-size:14px; line-height:1.7; margin-bottom:6px; }
-.quote-source { font-size:11px; color:var(--accent); font-family:'Space Mono',monospace; }
+/* PROFILE */
+.profile-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.profile-item:last-child{border-bottom:none;}
+.profile-label{font-size:13px;color:var(--muted);font-family:'Prompt',sans-serif;font-weight:300;}
+.profile-value{font-size:13px;font-weight:500;text-align:right;max-width:60%;}
 
-/* Chip */
-.chip {
-  display:inline-block; padding:4px 10px; border-radius:20px;
-  font-size:11px; background:rgba(108,99,255,0.12);
-  color:var(--accent); border:1px solid rgba(108,99,255,0.25); margin:3px 3px 3px 0;
-}
-.chip.green { background:rgba(0,212,170,0.12); color:var(--accent2); border-color:rgba(0,212,170,0.25); }
+/* CHIPS */
+.chip{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;background:rgba(124,92,252,.12);color:var(--accent3);border:1px solid rgba(124,92,252,.25);margin:3px 3px 3px 0;}
+.chip.green{background:rgba(0,229,176,.1);color:var(--accent2);border-color:rgba(0,229,176,.25);}
 
-/* Edit Profile Modal */
-.modal-overlay {
-  display:none; position:fixed; inset:0; z-index:100;
-  background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
-  align-items:flex-end; justify-content:center;
-}
-.modal-overlay.open { display:flex; }
-.modal {
-  background:var(--card); border:1px solid var(--border);
-  border-radius:24px 24px 0 0; padding:20px;
-  width:100%; max-width:430px; max-height:85vh;
-  overflow-y:auto; animation:slideUp 0.3s ease;
-}
-@keyframes slideUp {
-  from { transform:translateY(100%); }
-  to { transform:translateY(0); }
-}
-.modal-title { font-size:17px; font-weight:700; margin-bottom:16px; }
-.modal-close {
-  float:right; background:var(--surface); border:none;
-  color:var(--muted); width:28px; height:28px; border-radius:50%;
-  font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-}
-.field { margin-bottom:14px; }
-.field label { font-size:11px; color:var(--muted); display:block; margin-bottom:5px; letter-spacing:0.5px; }
-.field input, .field textarea {
-  width:100%; background:var(--surface); border:1px solid var(--border);
-  border-radius:10px; padding:10px 12px; color:var(--text);
-  font-family:'Noto Sans Thai',sans-serif; font-size:14px; outline:none;
-}
-.field input:focus, .field textarea:focus { border-color:var(--accent); }
-.field textarea { height:70px; resize:none; }
-.save-btn {
-  width:100%; padding:13px; border-radius:12px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  border:none; color:#fff; font-size:15px; font-weight:600;
-  font-family:'Noto Sans Thai',sans-serif; cursor:pointer;
-  margin-top:6px;
-}
-.edit-btn {
-  background:var(--surface); border:1px solid var(--border);
-  color:var(--muted); padding:6px 14px; border-radius:20px;
-  font-size:12px; cursor:pointer; font-family:'Noto Sans Thai',sans-serif;
-  float:right; margin-top:-2px;
-}
+/* BUTTONS */
+.save-btn{width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#ff9a5c);border:none;color:#fff;font-size:16px;font-weight:700;font-family:'Kanit',sans-serif;cursor:pointer;margin-top:8px;box-shadow:0 6px 20px rgba(255,107,53,.4);transition:transform .15s;}
+.save-btn:active{transform:scale(.97);}
+.add-btn{width:100%;padding:10px;border-radius:12px;background:rgba(124,92,252,.12);border:1.5px dashed rgba(124,92,252,.35);color:var(--accent3);font-size:14px;cursor:pointer;font-family:'Sarabun',sans-serif;margin-top:10px;}
+.notif-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,107,53,.2),rgba(255,200,67,.15));border:1px solid rgba(255,107,53,.35);border-radius:14px;padding:12px 16px;cursor:pointer;width:100%;font-family:'Sarabun',sans-serif;font-size:14px;color:var(--text);transition:all .2s;margin-bottom:10px;}
+.edit-inline-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'Sarabun',sans-serif;}
+
+/* ROUTINE EDIT */
+.routine-edit-item{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--border);}
+.routine-edit-item:last-child{border-bottom:none;}
+.time-input{width:70px;flex-shrink:0;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 6px;color:var(--text);font-family:'Kanit',sans-serif;font-size:13px;outline:none;}
+.task-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;outline:none;}
+.del-btn{background:none;border:none;color:#ff6b6b;font-size:20px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1;}
+
+/* SOUND TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
+.toggle-wrap{position:relative;width:44px;height:26px;cursor:pointer;flex-shrink:0;}
+.toggle-wrap input{opacity:0;width:0;height:0;}
+.toggle-track{position:absolute;inset:0;border-radius:13px;background:var(--surface);border:1.5px solid var(--border);transition:.3s;}
+.toggle-track.on{background:rgba(0,229,176,.25);border-color:var(--accent2);}
+.toggle-knob{position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:.3s;}
+.toggle-knob.on{transform:translateX(18px);background:#fff;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card2);border:1px solid var(--border);border-radius:28px 28px 0 0;padding:22px 20px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-size:18px;font-weight:700;font-family:'Kanit',sans-serif;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:var(--surface);border:none;color:var(--muted);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.field{margin-bottom:14px;}
+.field label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;font-family:'Prompt',sans-serif;}
+.field input,.field textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.field input:focus,.field textarea:focus{border-color:var(--accent3);}
+.field textarea{height:75px;resize:none;}
+
+/* STREAK */
+.streak-display{text-align:center;padding:16px 0;}
+.streak-big{font-size:70px;animation:flicker 1.5s ease infinite;}
+.streak-count{font-size:48px;font-weight:700;font-family:'Kanit',sans-serif;color:var(--gold);}
+.streak-text{font-size:15px;color:var(--muted);margin-top:6px;font-family:'Prompt',sans-serif;}
+.streak-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:16px;}
+.s-day{aspect-ratio:1;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);}
+.s-day.active{background:rgba(255,200,67,.2);border-color:var(--gold);}
+.s-day.today-day{background:linear-gradient(135deg,rgba(255,107,53,.3),rgba(255,200,67,.2));border-color:var(--accent);color:#fff;font-weight:700;}
+
+/* TOAST */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(32,27,56,.97);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:999;border:1px solid var(--border);font-family:'Sarabun',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:opacity .3s;pointer-events:none;opacity:0;white-space:nowrap;}
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- Header -->
   <div class="header">
-    <div class="header-top">
+    <div class="header-row">
       <div>
-        <div class="greeting">สวัสดี,</div>
-        <div class="name-display" id="headerName">กำลังโหลด...</div>
+        <div class="greeting">السلام عليكم,</div>
+        <div class="user-name" id="headerName">MyDash</div>
       </div>
-      <button class="avatar-btn" onclick="openModal()" title="แก้ไขโปรไฟล์">✏️</button>
+      <div class="header-right">
+        <div class="streak-badge" onclick="openStreakModal()">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-num" id="streakNum">0</span>
+        </div>
+        <button class="avatar-btn" onclick="openProfileModal()">✏️</button>
+      </div>
     </div>
     <div class="time-display" id="clock">00:00</div>
     <div class="date-display" id="dateDisplay">--</div>
   </div>
 
-  <!-- Nav -->
   <div class="nav">
-    <button class="nav-btn active" onclick="showSection('today',this)">วันนี้</button>
-    <button class="nav-btn" onclick="showSection('goals',this)">เป้าหมาย</button>
-    <button class="nav-btn" onclick="showSection('habits',this)">นิสัย</button>
-    <button class="nav-btn" onclick="showSection('profile',this)">โปรไฟล์</button>
+    <button class="nav-btn active" onclick="showSection('today',this)">🌅 วันนี้</button>
+    <button class="nav-btn" onclick="showSection('goals',this)">🎯 เป้าหมาย</button>
+    <button class="nav-btn" onclick="showSection('habits',this)">✅ นิสัย</button>
+    <button class="nav-btn" onclick="showSection('settings',this)">⚙️ ตั้งค่า</button>
   </div>
 
-  <!-- Content -->
   <div class="content">
 
     <!-- TODAY -->
     <div class="section active" id="today">
+      <div class="current-card">
+        <div class="cur-label">⏱ กำลังทำอยู่ตอนนี้</div>
+        <div class="cur-time" id="curTime">--:--</div>
+        <div class="cur-task" id="curTask">กำลังโหลด...</div>
+        <div class="next-wrap" id="nextWrap">
+          <div class="next-label">▸ ถัดไป</div>
+          <div class="next-row">
+            <div class="next-dot"></div>
+            <div class="next-task" id="nextTask">--</div>
+            <div class="next-time" id="nextTime">--:--</div>
+          </div>
+        </div>
+      </div>
 
       <div class="card">
         <div class="card-title">🕌 ละหมาดวันนี้</div>
         <div class="prayer-grid" id="prayerGrid"></div>
       </div>
 
-      <div class="card">
-        <div class="card-title">📅 Routine วันนี้</div>
-        <div class="timeline" id="timeline"></div>
-      </div>
-
-      <div class="quote-card">
+      <div class="quote-card" onclick="rotateQuote()">
         <div class="quote-text" id="quoteText"></div>
         <div class="quote-source" id="quoteSource"></div>
+        <div class="quote-hint">แตะเพื่อเปลี่ยนคำคม ✨</div>
       </div>
-
     </div>
 
     <!-- GOALS -->
     <div class="section" id="goals">
-      <div class="section-header">🎯 เป้าหมายของฉัน</div>
+      <div class="section-header">🎯 เป้าหมาย</div>
       <div class="card">
-        <div class="card-title">ระยะสั้น — ช่วงมหา'ลัย</div>
+        <div class="card-title">⚡ ระยะสั้น</div>
         <div class="goal-item">
-          <div class="goal-icon" style="background:rgba(108,99,255,0.15)">💪</div>
-          <div class="goal-text">
-            <div class="goal-title">สุขภาพแข็งแรง</div>
-            <div class="goal-sub">ออกกำลังกายทุกวัน เล่นบอลสม่ำเสมอ</div>
-            <div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--accent)"></div></div>
-          </div>
+          <div class="goal-icon" style="background:rgba(124,92,252,.15)">💪</div>
+          <div class="goal-text"><div class="goal-title">สุขภาพแข็งแรง</div><div class="goal-sub">ออกกำลังกายทุกวัน เล่นบอลสม่ำเสมอ</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:40%;background:linear-gradient(90deg,var(--accent3),var(--pink))"></div></div></div>
         </div>
         <div class="goal-item">
-          <div class="goal-icon" style="background:rgba(0,212,170,0.15)">🎓</div>
-          <div class="goal-text">
-            <div class="goal-title">เรียนดีพอ ไม่เครียดเกิน</div>
-            <div class="goal-sub">เกรดดี มีเวลาชีวิต balance</div>
-            <div class="progress-bar"><div class="progress-fill" style="width:10%;background:var(--accent2)"></div></div>
-          </div>
+          <div class="goal-icon" style="background:rgba(0,229,176,.12)">🎓</div>
+          <div class="goal-text"><div class="goal-title">เรียนดีพอ ไม่เครียดเกิน</div><div class="goal-sub">เกรดดี มีชีวิต balance</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:10%;background:linear-gradient(90deg,var(--accent2),var(--blue))"></div></div></div>
         </div>
         <div class="goal-item">
-          <div class="goal-icon" style="background:rgba(255,215,0,0.15)">🕌</div>
-          <div class="goal-text">
-            <div class="goal-title">ความรู้ศาสนาอิสลาม</div>
-            <div class="goal-sub">ละหมาด 5 เวลา ท่องจำอัลกุรอาน</div>
-            <div class="progress-bar"><div class="progress-fill" style="width:50%;background:var(--gold)"></div></div>
-          </div>
+          <div class="goal-icon" style="background:rgba(255,200,67,.12)">🕌</div>
+          <div class="goal-text"><div class="goal-title">ความรู้ศาสนาอิสลาม</div><div class="goal-sub">ละหมาด 5 เวลา ท่องจำอัลกุรอาน</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:50%;background:linear-gradient(90deg,var(--gold),var(--accent))"></div></div></div>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-title">ระยะยาว — อนาคต</div>
+        <div class="card-title">🚀 ระยะยาว</div>
         <div class="goal-item">
-          <div class="goal-icon" style="background:rgba(255,107,107,0.15)">💰</div>
-          <div class="goal-text">
-            <div class="goal-title">เก็บเงินสู่ขอ 150,000 บาท</div>
-            <div class="goal-sub">เป้าอายุ ~23 ปี / เก็บ 2,500/เดือน</div>
-            <div class="progress-bar"><div class="progress-fill" style="width:2%;background:var(--accent3)"></div></div>
-          </div>
+          <div class="goal-icon" style="background:rgba(255,107,53,.12)">💰</div>
+          <div class="goal-text"><div class="goal-title">เก็บเงินสู่ขอ 150,000 บาท</div><div class="goal-sub">อายุ ~23 ปี / เก็บ 2,500 บาท/เดือน</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:2%;background:linear-gradient(90deg,var(--accent),var(--gold))"></div></div></div>
         </div>
         <div class="goal-item">
-          <div class="goal-icon" style="background:rgba(108,99,255,0.15)">📈</div>
-          <div class="goal-text">
-            <div class="goal-title">เริ่มลงทุนหุ้น</div>
-            <div class="goal-sub">เป้าอายุ 20 ปี — ศึกษาก่อนลงมือ</div>
-            <div class="progress-bar"><div class="progress-fill" style="width:5%;background:var(--accent)"></div></div>
-          </div>
+          <div class="goal-icon" style="background:rgba(79,195,247,.12)">📈</div>
+          <div class="goal-text"><div class="goal-title">เริ่มลงทุนหุ้น</div><div class="goal-sub">เป้าอายุ 20 ปี — ศึกษาก่อนลงมือ</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:5%;background:linear-gradient(90deg,var(--blue),var(--accent3))"></div></div></div>
         </div>
         <div class="goal-item">
-          <div class="goal-icon" style="background:rgba(0,212,170,0.15)">✈️</div>
-          <div class="goal-text">
-            <div class="goal-title">เที่ยวรอบโลก</div>
-            <div class="goal-sub">ทำงาน AI/โค้ด มีรายได้ดี</div>
-            <div class="progress-bar"><div class="progress-fill" style="width:1%;background:var(--accent2)"></div></div>
-          </div>
+          <div class="goal-icon" style="background:rgba(0,229,176,.12)">✈️</div>
+          <div class="goal-text"><div class="goal-title">เที่ยวรอบโลก</div><div class="goal-sub">ทำงาน AI/โค้ด มีรายได้ดี</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:1%;background:linear-gradient(90deg,var(--accent2),var(--blue))"></div></div></div>
         </div>
         <div class="goal-item">
-          <div class="goal-icon" style="background:rgba(255,215,0,0.15)">👨‍👩‍👧</div>
-          <div class="goal-text">
-            <div class="goal-title">แต่งงาน — สร้างครอบครัว</div>
-            <div class="goal-sub">แต่งงานเร็ว สอนลูกเรื่องศาสนา</div>
-            <div class="progress-bar"><div class="progress-fill" style="width:5%;background:var(--gold)"></div></div>
-          </div>
+          <div class="goal-icon" style="background:rgba(255,200,67,.12)">💍</div>
+          <div class="goal-text"><div class="goal-title">แต่งงาน — สร้างครอบครัว</div><div class="goal-sub">แต่งงานเร็ว สอนลูกเรื่องศาสนา</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:5%;background:linear-gradient(90deg,var(--gold),var(--pink))"></div></div></div>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-title">ทักษะที่ต้องพัฒนา</div>
+        <div class="card-title">🛠 ทักษะที่พัฒนา</div>
         <div style="padding-top:4px">
-          <span class="chip">Python</span><span class="chip">AI / ML</span>
+          <span class="chip">Python</span><span class="chip">AI/ML</span>
           <span class="chip green">ภาษาอังกฤษ</span><span class="chip green">คณิตศาสตร์</span>
           <span class="chip">การลงทุน</span><span class="chip green">TikTok</span>
           <span class="chip">ฟิสิกส์</span><span class="chip green">ฟุตบอล</span>
@@ -367,317 +298,417 @@ body::before {
     <!-- HABITS -->
     <div class="section" id="habits">
       <div class="section-header">✅ นิสัยประจำวัน</div>
+      <div class="card"><div class="card-title">วันนี้ทำแล้วหรือยัง?</div><div id="habitList"></div></div>
       <div class="card">
-        <div class="card-title">วันนี้ทำแล้วหรือยัง?</div>
-        <div id="habitList"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">สถิติวันนี้</div>
+        <div class="card-title">📊 สถิติวันนี้</div>
         <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-value" id="habitCount">0/7</div>
-            <div class="stat-label">นิสัยที่ทำแล้ว</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="prayerCountStat">0/5</div>
-            <div class="stat-label">ละหมาดแล้ว</div>
-          </div>
+          <div class="stat-card"><div class="stat-value" id="habitCount">0/7</div><div class="stat-label">นิสัยที่ทำแล้ว</div></div>
+          <div class="stat-card"><div class="stat-value" id="prayerStat">0/5</div><div class="stat-label">ละหมาดแล้ว</div></div>
         </div>
       </div>
     </div>
 
-    <!-- PROFILE -->
-    <div class="section" id="profile">
-      <div class="section-header">
-        👤 โปรไฟล์ของฉัน
-        <button class="edit-btn" onclick="openModal()">✏️ แก้ไข</button>
-      </div>
+    <!-- SETTINGS -->
+    <div class="section" id="settings">
+      <div class="section-header">⚙️ ตั้งค่า</div>
+
       <div class="card">
-        <div class="card-title">ข้อมูลส่วนตัว</div>
-        <div id="profilePersonal"></div>
+        <div class="card-title">🔔 การแจ้งเตือน</div>
+        <button class="notif-btn" onclick="requestNotif()"><span style="font-size:20px">🔔</span><span id="notifText">เปิดการแจ้งเตือน</span></button>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7;font-family:'Prompt',sans-serif">ต้องติดตั้งแอปลงหน้าจอก่อน (Add to Home Screen) และใช้ iOS 16.4+ จึงจะได้รับการแจ้งเตือนได้</p>
       </div>
+
       <div class="card">
-        <div class="card-title">การศึกษา</div>
-        <div id="profileEducation"></div>
+        <div class="card-title">🔊 เสียงและฟีดแบ็ก</div>
+        <div class="toggle-row">
+          <span style="font-size:14px">เสียงเมื่อติ๊กสำเร็จ</span>
+          <div class="toggle-wrap" onclick="toggleSound()">
+            <div class="toggle-track" id="soundTrack"></div>
+            <div class="toggle-knob" id="soundKnob"></div>
+          </div>
+        </div>
       </div>
+
       <div class="card">
-        <div class="card-title">การเงิน</div>
-        <div id="profileFinance"></div>
+        <div class="card-title">📅 แก้ไข Routine (Realtime)</div>
+        <div id="routineEditList"></div>
+        <button class="add-btn" onclick="addRoutine()">+ เพิ่มกิจกรรม</button>
+        <button class="save-btn" style="margin-top:12px" onclick="saveRoutine()">💾 บันทึก Routine</button>
       </div>
+
       <div class="card">
-        <div class="card-title">ความท้าทาย</div>
-        <div id="profileChallenges"></div>
+        <div class="card-title">👤 โปรไฟล์</div>
+        <div id="profileView"></div>
+        <button class="save-btn" onclick="openProfileModal()">✏️ แก้ไขโปรไฟล์</button>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- Edit Profile Modal -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal" onclick="closeModalOut(event,'profileModal')">
   <div class="modal">
-    <div class="modal-title">
-      ✏️ แก้ไขโปรไฟล์
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="field"><label>ชื่อ / ชื่อเล่น</label><input id="f-name" type="text" placeholder="ชื่อของคุณ"></div>
-    <div class="field"><label>อายุ</label><input id="f-age" type="text" placeholder="เช่น 18 ปี 5 เดือน"></div>
-    <div class="field"><label>มหาวิทยาลัย</label><input id="f-uni" type="text" placeholder="เช่น ม.วลัยลักษณ์"></div>
-    <div class="field"><label>คณะ / สาขา</label><input id="f-faculty" type="text" placeholder="เช่น วิศวกรรมคอมพิวเตอร์ & AI"></div>
-    <div class="field"><label>ศาสนา</label><input id="f-religion" type="text" placeholder="เช่น อิสลาม"></div>
-    <div class="field"><label>เงินเก็บปัจจุบัน</label><input id="f-savings" type="text" placeholder="เช่น 2,000 บาท"></div>
-    <div class="field"><label>แหล่งรายได้</label><input id="f-income" type="text" placeholder="เช่น TikTok + ปักตะกร้า"></div>
-    <div class="field"><label>เป้าหมายเงิน</label><input id="f-moneygoal" type="text" placeholder="เช่น 150,000 บาท (สู่ขอ)"></div>
-    <div class="field"><label>โน้ตส่วนตัว / สิ่งที่กำลังทำ</label><textarea id="f-notes" placeholder="บันทึกอะไรก็ได้ที่อยากจำ..."></textarea></div>
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ แก้ไขโปรไฟล์ <button class="modal-close" onclick="closeModal('profileModal')">✕</button></div>
+    <div class="field"><label>ชื่อ / ชื่อเล่น</label><input id="f-name" type="text"></div>
+    <div class="field"><label>อายุ</label><input id="f-age" type="text"></div>
+    <div class="field"><label>มหาวิทยาลัย</label><input id="f-uni" type="text"></div>
+    <div class="field"><label>คณะ / สาขา</label><input id="f-faculty" type="text"></div>
+    <div class="field"><label>ศาสนา</label><input id="f-religion" type="text"></div>
+    <div class="field"><label>เงินเก็บปัจจุบัน</label><input id="f-savings" type="text"></div>
+    <div class="field"><label>แหล่งรายได้</label><input id="f-income" type="text"></div>
+    <div class="field"><label>เป้าหมายเงิน</label><input id="f-moneygoal" type="text"></div>
+    <div class="field"><label>โน้ตส่วนตัว</label><textarea id="f-notes"></textarea></div>
     <button class="save-btn" onclick="saveProfile()">💾 บันทึก</button>
   </div>
 </div>
 
+<!-- STREAK MODAL -->
+<div class="modal-overlay" id="streakModal" onclick="closeModalOut(event,'streakModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔥 Streak ของฉัน <button class="modal-close" onclick="closeModal('streakModal')">✕</button></div>
+    <div class="streak-display">
+      <div class="streak-big">🔥</div>
+      <div class="streak-count" id="streakBig">0</div>
+      <div class="streak-text" id="streakText">วันแรก — ไปต่อ!</div>
+    </div>
+    <div class="streak-calendar" id="streakCal"></div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:14px;font-family:'Prompt',sans-serif;line-height:1.7">เข้าแอปทุกวันเพื่อรักษาไฟของคุณ!<br>ขาดแม้วันเดียวไฟจะดับ 💧</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
 <script>
-// ========== DATA ==========
-const PRAYERS = [
-  { id:'subh', name:'ซุบฮฺ', time:'05:20' },
-  { id:'zuhr', name:'ซุฮฺร์', time:'12:10' },
-  { id:'asr', name:'อัศร์', time:'15:30' },
-  { id:'maghrib', name:'มัฆริบ', time:'18:20' },
-  { id:'isha', name:'อิชาอ์', time:'19:30' },
+// ===== CONSTANTS =====
+const PRAYERS_DATA = [
+  {id:'subh',name:'ซุบฮฺ',time:'05:20'},
+  {id:'zuhr',name:'ซุฮฺร์',time:'12:10'},
+  {id:'asr',name:'อัศร์',time:'15:30'},
+  {id:'maghrib',name:'มัฆริบ',time:'18:20'},
+  {id:'isha',name:'อิชาอ์',time:'19:30'},
 ];
-
-const ROUTINE = [
-  { hour:5,    task:'ตื่น — ละหมาดซุบฮฺ' },
-  { hour:5.5,  task:'🏃 วิ่ง / ออกกำลังกาย' },
-  { hour:6.75, task:'📖 อ่านศาสนา / ท่องจำ' },
-  { hour:7.25, task:'💻 อังกฤษ / คณิต / โค้ด' },
-  { hour:8,    task:'📱 ถ่าย TikTok / ปักตะกร้า' },
-  { hour:12,   task:'🕌 ละหมาดซุฮฺร์ — พักเที่ยง' },
-  { hour:13.5, task:'💻 ฝึกโค้ด / อ่านหนังสือ' },
-  { hour:16.5, task:'🕌 ละหมาดอัศร์' },
-  { hour:17,   task:'⚽ เล่นบอล / ออกกำลังกาย' },
-  { hour:19,   task:'🕌 ละหมาดมัฆริบ — กินข้าว' },
-  { hour:20,   task:'❤️ คุยกับแฟน (1 ชั่วโมง)' },
-  { hour:21,   task:'🕌 ละหมาดอิชาอ์ — อัลกุรอาน' },
-  { hour:21.5, task:'💡 เรียนโค้ด / อ่านหนังสือ' },
-  { hour:22.5, task:'😴 นอน' },
+const HABITS_DATA = ['🏃 ออกกำลังกาย/วิ่ง','🕌 ละหมาดครบ 5 เวลา','📖 อ่านอัลกุรอาน','💻 ฝึกโค้ด/อ่านหนังสือ','📱 ลงคลิป TikTok','🌐 ฝึกภาษาอังกฤษ','⚽ เล่นบอล'];
+const DEFAULT_ROUTINE = [
+  {h:'05:00',t:'ตื่น — ละหมาดซุบฮฺ'},{h:'05:30',t:'🏃 วิ่ง / ออกกำลังกาย'},
+  {h:'06:45',t:'📖 อ่านศาสนา / ท่องจำ'},{h:'07:15',t:'💻 อังกฤษ / คณิต / โค้ด'},
+  {h:'08:00',t:'📱 ถ่าย TikTok / ปักตะกร้า'},{h:'12:00',t:'🕌 ละหมาดซุฮฺร์ — พักเที่ยง'},
+  {h:'13:30',t:'💻 ฝึกโค้ด / อ่านหนังสือ'},{h:'16:30',t:'🕌 ละหมาดอัศร์'},
+  {h:'17:00',t:'⚽ เล่นบอล / ออกกำลังกาย'},{h:'19:00',t:'🕌 มัฆริบ — กินข้าว'},
+  {h:'20:00',t:'❤️ คุยกับแฟน (1 ชม.)'},{h:'21:00',t:'🕌 อิชาอ์ — อ่านอัลกุรอาน'},
+  {h:'21:30',t:'💡 เรียนโค้ด / อ่านหนังสือ'},{h:'22:30',t:'😴 นอน'},
 ];
-
-const HABITS = [
-  '🏃 ออกกำลังกาย / วิ่ง',
-  '🕌 ละหมาดครบ 5 เวลา',
-  '📖 อ่านอัลกุรอาน',
-  '💻 ฝึกโค้ด / อ่านหนังสือ',
-  '📱 ลงคลิป TikTok',
-  '🌐 ฝึกภาษาอังกฤษ',
-  '⚽ เล่นบอล',
-];
-
+const DEFAULT_PROFILE = {name:'กีม',age:'18 ปี 5 เดือน',uni:'ม.วลัยลักษณ์',faculty:'วิศวกรรมคอมพิวเตอร์ & AI',religion:'อิสลาม',savings:'~2,000 บาท',income:'TikTok + ปักตะกร้า',moneygoal:'150,000 บาท (สู่ขอ)',notes:''};
 const QUOTES = [
-  { text:'"คนที่ไม่มีวินัยในวันนี้<br>จะไม่มีอิสรภาพในวันพรุ่งนี้"', src:'— แรงบันดาลใจ' },
-  { text:'"إِنَّ مَعَ الْعُسْرِ يُسْرًا<br>หลังความยากลำบาก ย่อมมีความสะดวก"', src:'— อัล-กุรอาน 94:6' },
-  { text:'"เริ่มเล็ก ทำสม่ำเสมอ<br>ผลลัพธ์ยิ่งใหญ่จะตามมาเอง"', src:'— หลักพัฒนาตัวเอง' },
-  { text:'"ทุกผู้เชี่ยวชาญ<br>เคยเป็นมือใหม่มาก่อน"', src:'— แรงบันดาลใจ' },
-  { text:'"الوقت كالسيف إن لم تقطعه قطعك<br>เวลาเหมือนดาบ ถ้าไม่ใช้มัน มันจะตัดคุณ"', src:'— ภาษิตอาหรับ' },
+  {t:'"คนที่ไม่มีวินัยในวันนี้<br>จะไม่มีอิสรภาพในวันพรุ่งนี้"',s:'— แรงบันดาลใจ'},
+  {t:'"إِنَّ مَعَ الْعُسْرِ يُسْرًا<br>หลังความยาก ย่อมมีความสะดวก"',s:'— อัล-กุรอาน 94:6'},
+  {t:'"เริ่มเล็ก ทำสม่ำเสมอ<br>ผลลัพธ์ยิ่งใหญ่จะตามมาเอง"',s:'— หลักพัฒนาตัวเอง'},
+  {t:'"ทุกผู้เชี่ยวชาญ<br>เคยเป็นมือใหม่มาก่อน"',s:'— แรงบันดาลใจ'},
+  {t:'"الوقت كالسيف إن لم تقطعه قطعك<br>เวลาเหมือนดาบ ถ้าไม่ใช้มัน มันจะตัดคุณ"',s:'— ภาษิตอาหรับ'},
+  {t:'"ความฝันไม่มีวันหมดอายุ<br>แค่ต้องลงมือทำให้เป็นจริง"',s:'— แรงบันดาลใจ'},
+  {t:'"จงอ่อนน้อมต่ออัลลอฮ์<br>แล้วพระองค์จะทรงยกระดับเจ้า"',s:'— ปรัชญาอิสลาม'},
+  {t:'"ความสำเร็จคือผลรวม<br>ของความพยายามเล็กๆ ทุกวัน"',s:'— Robert Collier'},
+  {t:'"อย่ากลัวที่จะเริ่มช้า<br>กลัวแค่ว่าจะไม่เริ่มเลย"',s:'— ภาษิตจีน'},
+  {t:'"ฝึกฝนวันนี้<br>เพื่อพรุ่งนี้จะไม่ต้องเสียใจ"',s:'— แรงบันดาลใจ'},
+  {t:'"صَلِّ قَبْلَ أَنْ يُصَلَّى عَلَيْكَ<br>ละหมาดก่อนที่จะมีการละหมาดเพื่อเจ้า"',s:'— ฮะดีษ'},
+  {t:'"ไม่มีใครประสบความสำเร็จ<br>โดยไม่เคยล้มเหลว"',s:'— แรงบันดาลใจ'},
 ];
 
-// Default profile
-const DEFAULT_PROFILE = {
-  name: 'น้องน้อย',
-  age: '18 ปี 5 เดือน',
-  uni: 'ม.วลัยลักษณ์',
-  faculty: 'วิศวกรรมคอมพิวเตอร์ & AI',
-  religion: 'อิสลาม',
-  savings: '~2,000 บาท',
-  income: 'TikTok + ปักตะกร้า',
-  moneygoal: '150,000 บาท (สู่ขอ)',
-  notes: '',
-};
-
-// ========== STATE ==========
+// ===== STATE =====
 let profile = JSON.parse(localStorage.getItem('profile') || JSON.stringify(DEFAULT_PROFILE));
-let prayerState = JSON.parse(localStorage.getItem('prayerState_' + today()) || '{}');
-let habitState = JSON.parse(localStorage.getItem('habitState_' + today()) || '{}');
+let routine = JSON.parse(localStorage.getItem('routine') || JSON.stringify(DEFAULT_ROUTINE));
+let prayerState = {}, habitState = {};
+let qIdx = 0;
+let audioCtx = null;
 
-function today() {
+function todayKey() {
   const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function loadDay() {
+  prayerState = JSON.parse(localStorage.getItem('pray_'+todayKey())||'{}');
+  habitState = JSON.parse(localStorage.getItem('habit_'+todayKey())||'{}');
 }
 
-// ========== CLOCK ==========
+// ===== AUDIO =====
+function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+function playTone(freqs, type='sine') {
+  if(!localStorage.getItem('soundOn')==='1' && localStorage.getItem('soundOn')!=='1') return;
+  try {
+    initAudio();
+    freqs.forEach(([freq,start,dur]) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.frequency.value = freq; o.type = type;
+      const t = audioCtx.currentTime + start;
+      g.gain.setValueAtTime(0.3,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+      o.start(t); o.stop(t+dur);
+    });
+  } catch(e){}
+}
+function playSuccess() { playTone([[523,0,.2],[659,.1,.2],[784,.2,.3]]); }
+function playPrayer() { playTone([[440,0,.4],[550,.3,.4],[440,.6,.3]]); }
+
+// ===== SOUND TOGGLE =====
+function toggleSound() {
+  initAudio();
+  const on = localStorage.getItem('soundOn')==='1';
+  localStorage.setItem('soundOn', on?'0':'1');
+  updateSoundUI(!on);
+  if(!on) playSuccess();
+}
+function updateSoundUI(on) {
+  document.getElementById('soundTrack').className = 'toggle-track'+(on?' on':'');
+  document.getElementById('soundKnob').className = 'toggle-knob'+(on?' on':'');
+}
+
+// ===== CLOCK =====
 function updateClock() {
   const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('clock').textContent = h + ':' + m;
-  const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  document.getElementById('dateDisplay').textContent =
-    `วัน${days[now.getDay()]}ที่ ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
-  updateTimeline(now.getHours() + now.getMinutes()/60);
-}
-setInterval(updateClock, 10000);
-
-// ========== RENDER ==========
-function renderAll() {
-  document.getElementById('headerName').textContent = profile.name || 'แดชบอร์ดของฉัน';
-  renderPrayers();
-  renderTimeline();
-  renderHabits();
-  renderProfile();
-  renderQuote();
-  updateClock();
+  document.getElementById('clock').textContent = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  document.getElementById('dateDisplay').textContent = `วัน${days[now.getDay()]}ที่ ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
+  updateCurrentTask(now);
 }
 
+// ===== CURRENT TASK =====
+function t2m(s) { const [h,m]=s.split(':').map(Number); return h*60+m; }
+function updateCurrentTask(now) {
+  if(!now) now = new Date();
+  const cur = now.getHours()*60+now.getMinutes();
+  const sorted = [...routine].sort((a,b)=>t2m(a.h)-t2m(b.h));
+  let ci=-1;
+  for(let i=0;i<sorted.length;i++) {
+    const nt = i+1<sorted.length ? t2m(sorted[i+1].h) : 1440;
+    if(cur>=t2m(sorted[i].h) && cur<nt) { ci=i; break; }
+  }
+  if(ci===-1 && cur<t2m(sorted[0].h)) ci=-1;
+  if(ci===-1 && cur>=t2m(sorted[sorted.length-1].h)) ci=sorted.length-1;
+  const current = ci>=0 ? sorted[ci] : null;
+  const next = ci>=0 && ci+1<sorted.length ? sorted[ci+1] : (ci===-1 ? sorted[0] : null);
+  if(current) {
+    document.getElementById('curTime').textContent = current.h;
+    document.getElementById('curTask').textContent = current.t;
+  } else {
+    document.getElementById('curTime').textContent = '--:--';
+    document.getElementById('curTask').textContent = 'ยังไม่ถึงกิจกรรมแรก';
+  }
+  if(next) {
+    document.getElementById('nextTask').textContent = next.t;
+    document.getElementById('nextTime').textContent = next.h;
+    document.getElementById('nextWrap').style.display = '';
+  } else {
+    document.getElementById('nextWrap').style.display = 'none';
+  }
+}
+
+// ===== PRAYERS =====
 function renderPrayers() {
-  const grid = document.getElementById('prayerGrid');
-  grid.innerHTML = PRAYERS.map(p => {
+  document.getElementById('prayerGrid').innerHTML = PRAYERS_DATA.map(p => {
     const done = prayerState[p.id];
     return `<div class="prayer-item${done?' done':''}" onclick="togglePrayer('${p.id}')">
       <div class="prayer-name">${p.name}</div>
       <div class="prayer-time">${p.time}</div>
-      <div class="prayer-emoji">${done ? '✅' : '⬜'}</div>
+      <div class="prayer-emoji">${done?'✅':'⬜'}</div>
     </div>`;
   }).join('');
-  updatePrayerStat();
+  const cnt = Object.values(prayerState).filter(Boolean).length;
+  document.getElementById('prayerStat').textContent = cnt+'/5';
 }
-
 function togglePrayer(id) {
   prayerState[id] = !prayerState[id];
-  localStorage.setItem('prayerState_' + today(), JSON.stringify(prayerState));
+  localStorage.setItem('pray_'+todayKey(), JSON.stringify(prayerState));
+  if(prayerState[id]) playPrayer();
   renderPrayers();
 }
 
-function updatePrayerStat() {
-  const count = Object.values(prayerState).filter(Boolean).length;
-  document.getElementById('prayerCountStat').textContent = count + '/5';
-}
-
-function renderTimeline() {
-  const currentHour = new Date().getHours() + new Date().getMinutes()/60;
-  const tl = document.getElementById('timeline');
-  let currentSet = false;
-  tl.innerHTML = ROUTINE.map((item, i) => {
-    const nextHour = ROUTINE[i+1] ? ROUTINE[i+1].hour : 24;
-    let cls = '';
-    if (currentHour >= nextHour) cls = 'done';
-    else if (currentHour >= item.hour && !currentSet) { cls = 'current'; currentSet = true; }
-    const hh = String(Math.floor(item.hour)).padStart(2,'0');
-    const mm = String(Math.round((item.hour % 1) * 60)).padStart(2,'0');
-    return `<div class="timeline-item ${cls}">
-      <div class="timeline-time">${hh}:${mm}</div>
-      <div class="timeline-task">${item.task}</div>
-    </div>`;
-  }).join('');
-}
-
-function updateTimeline(h) { renderTimeline(); }
-
+// ===== HABITS =====
 function renderHabits() {
-  const list = document.getElementById('habitList');
-  list.innerHTML = HABITS.map((habit, i) => {
-    const checked = habitState[i];
+  document.getElementById('habitList').innerHTML = HABITS_DATA.map((h,i) => {
+    const done = habitState[i];
     return `<div class="habit-item">
-      <div class="habit-toggle ${checked?'checked':''}" onclick="toggleHabit(${i})">${checked?'✓':''}</div>
-      <div class="habit-name">${habit}</div>
-      <div class="habit-streak">🔥 ${checked?1:0}</div>
+      <div class="habit-toggle${done?' checked':''}" onclick="toggleHabit(${i})">${done?'✓':''}</div>
+      <div class="habit-name">${h}</div>
+      <div class="habit-streak">${done?'🔥 1':'—'}</div>
     </div>`;
   }).join('');
-  updateHabitStat();
+  const cnt = Object.values(habitState).filter(Boolean).length;
+  document.getElementById('habitCount').textContent = cnt+'/'+HABITS_DATA.length;
 }
-
 function toggleHabit(i) {
   habitState[i] = !habitState[i];
-  localStorage.setItem('habitState_' + today(), JSON.stringify(habitState));
+  localStorage.setItem('habit_'+todayKey(), JSON.stringify(habitState));
+  if(habitState[i]) playSuccess();
   renderHabits();
 }
 
-function updateHabitStat() {
-  const count = Object.values(habitState).filter(Boolean).length;
-  document.getElementById('habitCount').textContent = count + '/' + HABITS.length;
+// ===== ROUTINE EDIT =====
+function renderRoutineEdit() {
+  document.getElementById('routineEditList').innerHTML = routine.map((r,i) =>
+    `<div class="routine-edit-item">
+      <input class="time-input" type="time" value="${r.h}" id="rh${i}">
+      <input class="task-input" type="text" value="${r.t}" id="rt${i}" placeholder="กิจกรรม">
+      <button class="del-btn" onclick="delRoutine(${i})">×</button>
+    </div>`
+  ).join('');
+}
+function addRoutine() {
+  routine.push({h:'12:00',t:'กิจกรรมใหม่'});
+  renderRoutineEdit();
+}
+function delRoutine(i) {
+  routine.splice(i,1);
+  renderRoutineEdit();
+}
+function saveRoutine() {
+  const rows = document.querySelectorAll('.routine-edit-item');
+  routine = Array.from(rows).map((_,i)=>({h:document.getElementById('rh'+i).value, t:document.getElementById('rt'+i).value})).filter(r=>r.h&&r.t);
+  routine.sort((a,b)=>t2m(a.h)-t2m(b.h));
+  localStorage.setItem('routine',JSON.stringify(routine));
+  renderRoutineEdit(); updateCurrentTask();
+  if(localStorage.getItem('notifOn')==='1') scheduleNotifs();
+  showToast('✅ บันทึก Routine แล้ว!');
 }
 
+// ===== PROFILE =====
 function renderProfile() {
-  document.getElementById('profilePersonal').innerHTML = `
-    <div class="profile-item"><div class="profile-label">ชื่อ</div><div class="profile-value">${profile.name}</div></div>
-    <div class="profile-item"><div class="profile-label">อายุ</div><div class="profile-value">${profile.age}</div></div>
-    <div class="profile-item"><div class="profile-label">ศาสนา</div><div class="profile-value">${profile.religion}</div></div>
-    ${profile.notes ? `<div class="profile-item"><div class="profile-label">โน้ต</div><div class="profile-value">${profile.notes}</div></div>` : ''}
-  `;
-  document.getElementById('profileEducation').innerHTML = `
-    <div class="profile-item"><div class="profile-label">มหา'ลัย</div><div class="profile-value">${profile.uni}</div></div>
-    <div class="profile-item"><div class="profile-label">คณะ/สาขา</div><div class="profile-value">${profile.faculty}</div></div>
-  `;
-  document.getElementById('profileFinance').innerHTML = `
-    <div class="profile-item"><div class="profile-label">เงินเก็บ</div><div class="profile-value">${profile.savings}</div></div>
-    <div class="profile-item"><div class="profile-label">รายได้</div><div class="profile-value">${profile.income}</div></div>
-    <div class="profile-item"><div class="profile-label">เป้าหมายเงิน</div><div class="profile-value">${profile.moneygoal}</div></div>
-  `;
-  document.getElementById('profileChallenges').innerHTML = `
-    <div class="profile-item"><div class="profile-label">ปัญหาหลัก</div><div class="profile-value">วินัยไม่ต่อเนื่อง</div></div>
-    <div class="profile-item"><div class="profile-label">ความกังวล</div><div class="profile-value">ตามโลก AI ไม่ทัน</div></div>
-    <div class="profile-item"><div class="profile-label">กำลังพัฒนา</div><div class="profile-value">นิสัยประจำวัน</div></div>
-  `;
+  document.getElementById('headerName').textContent = profile.name||'MyDash';
+  document.getElementById('profileView').innerHTML = [
+    ['ชื่อ',profile.name],['อายุ',profile.age],['มหา\'ลัย',profile.uni],
+    ['สาขา',profile.faculty],['ศาสนา',profile.religion],
+    ['เงินเก็บ',profile.savings],['รายได้',profile.income],['เป้าเงิน',profile.moneygoal],
+    ...(profile.notes?[['โน้ต',profile.notes]]:[])
+  ].map(([l,v])=>`<div class="profile-item"><div class="profile-label">${l}</div><div class="profile-value">${v}</div></div>`).join('');
 }
-
-function renderQuote() {
-  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-  document.getElementById('quoteText').innerHTML = q.text;
-  document.getElementById('quoteSource').textContent = q.src;
+function openProfileModal() {
+  ['name','age','uni','faculty','religion','savings','income','moneygoal','notes'].forEach(k=>{
+    document.getElementById('f-'+k).value = profile[k]||'';
+  });
+  openModal('profileModal');
 }
-setInterval(renderQuote, 12000);
-
-// ========== NAV ==========
-function showSection(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if (btn) btn.classList.add('active');
-}
-
-// ========== MODAL ==========
-function openModal() {
-  document.getElementById('f-name').value = profile.name || '';
-  document.getElementById('f-age').value = profile.age || '';
-  document.getElementById('f-uni').value = profile.uni || '';
-  document.getElementById('f-faculty').value = profile.faculty || '';
-  document.getElementById('f-religion').value = profile.religion || '';
-  document.getElementById('f-savings').value = profile.savings || '';
-  document.getElementById('f-income').value = profile.income || '';
-  document.getElementById('f-moneygoal').value = profile.moneygoal || '';
-  document.getElementById('f-notes').value = profile.notes || '';
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-}
-
 function saveProfile() {
-  profile = {
-    name: document.getElementById('f-name').value || DEFAULT_PROFILE.name,
-    age: document.getElementById('f-age').value || DEFAULT_PROFILE.age,
-    uni: document.getElementById('f-uni').value || DEFAULT_PROFILE.uni,
-    faculty: document.getElementById('f-faculty').value || DEFAULT_PROFILE.faculty,
-    religion: document.getElementById('f-religion').value || DEFAULT_PROFILE.religion,
-    savings: document.getElementById('f-savings').value || DEFAULT_PROFILE.savings,
-    income: document.getElementById('f-income').value || DEFAULT_PROFILE.income,
-    moneygoal: document.getElementById('f-moneygoal').value || DEFAULT_PROFILE.moneygoal,
-    notes: document.getElementById('f-notes').value,
-  };
-  localStorage.setItem('profile', JSON.stringify(profile));
-  closeModal();
-  renderAll();
+  ['name','age','uni','faculty','religion','savings','income','moneygoal','notes'].forEach(k=>{
+    profile[k] = document.getElementById('f-'+k).value;
+  });
+  if(!profile.name) profile.name = DEFAULT_PROFILE.name;
+  localStorage.setItem('profile',JSON.stringify(profile));
+  closeModal('profileModal'); renderProfile();
+  showToast('✅ บันทึกโปรไฟล์แล้ว!'); playSuccess();
 }
 
-// ========== PWA ==========
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+// ===== QUOTE =====
+function rotateQuote() {
+  qIdx = (qIdx+1)%QUOTES.length;
+  const q = QUOTES[qIdx];
+  document.getElementById('quoteText').innerHTML = q.t;
+  document.getElementById('quoteSource').textContent = q.s;
+}
+setInterval(rotateQuote, 18000);
+
+// ===== STREAK =====
+function checkStreak() {
+  const today = todayKey();
+  const last = localStorage.getItem('lastLogin');
+  let streak = parseInt(localStorage.getItem('streak')||'0');
+  let hist = JSON.parse(localStorage.getItem('streakHist')||'[]');
+  if(last !== today) {
+    const yest = new Date(); yest.setDate(yest.getDate()-1);
+    const yKey = `${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+    streak = last===yKey ? streak+1 : 1;
+    localStorage.setItem('streak',streak);
+    localStorage.setItem('lastLogin',today);
+    if(!hist.includes(today)) { hist.push(today); if(hist.length>28) hist.shift(); }
+    localStorage.setItem('streakHist',JSON.stringify(hist));
+  }
+  document.getElementById('streakNum').textContent = streak;
+  document.getElementById('streakBig').textContent = streak;
+  document.getElementById('streakText').textContent = streak>1?`วันติดต่อกัน 🎉`:'วันแรก — ไปต่อ!';
+  renderStreakCal(hist);
+}
+function renderStreakCal(hist) {
+  const today = todayKey();
+  const cal = document.getElementById('streakCal');
+  const days = [];
+  for(let i=20;i>=0;i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    days.push({k,label:d.getDate()});
+  }
+  cal.innerHTML = days.map(d=>{
+    let cls='s-day';
+    if(d.k===today) cls+=' today-day';
+    else if(hist.includes(d.k)) cls+=' active';
+    return `<div class="${cls}">${d.label}</div>`;
+  }).join('');
+}
+function openStreakModal() { openModal('streakModal'); }
+
+// ===== NOTIFICATIONS =====
+function requestNotif() {
+  if(!('Notification' in window)) { showToast('❌ browser นี้ไม่รองรับ'); return; }
+  Notification.requestPermission().then(p=>{
+    if(p==='granted') {
+      localStorage.setItem('notifOn','1');
+      document.getElementById('notifText').textContent = '✅ เปิดการแจ้งเตือนแล้ว';
+      scheduleNotifs(); showToast('✅ เปิดการแจ้งเตือนแล้ว!');
+    } else { showToast('❌ ไม่ได้รับอนุญาต'); }
+  });
+}
+function scheduleNotifs() {
+  if(Notification.permission!=='granted') return;
+  routine.forEach(r=>{
+    const [h,m] = r.h.split(':').map(Number);
+    const now = new Date();
+    const target = new Date(); target.setHours(h,m,0,0);
+    const delay = target-now;
+    if(delay>0) setTimeout(()=>{
+      new Notification('⏰ MyDash — '+r.t, {icon:'icons/icon-192.png'});
+    }, delay);
+  });
 }
 
-// ========== INIT ==========
-renderAll();
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOut(e,id) { if(e.target===document.getElementById(id)) closeModal(id); }
+
+// ===== NAV =====
+function showSection(id,btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.style.opacity='0', 2500);
+}
+
+// ===== INIT =====
+function init() {
+  loadDay(); checkStreak();
+  qIdx = Math.floor(Math.random()*QUOTES.length);
+  document.getElementById('quoteText').innerHTML = QUOTES[qIdx].t;
+  document.getElementById('quoteSource').textContent = QUOTES[qIdx].s;
+  renderProfile(); renderPrayers(); renderHabits(); renderRoutineEdit();
+  updateClock(); updateSoundUI(localStorage.getItem('soundOn')==='1');
+  if(localStorage.getItem('notifOn')==='1' && typeof Notification!=='undefined' && Notification.permission==='granted') {
+    document.getElementById('notifText').textContent = '✅ เปิดการแจ้งเตือนแล้ว';
+    scheduleNotifs();
+  }
+  setInterval(updateClock, 30000);
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+init();
 </script>
 </body>
 </html>
