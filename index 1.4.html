@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ff6b35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MyDash">
+<link rel="manifest" href="manifest.json">
+<title>MyDash</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root{
+  --bg:#0a0714;--surface:#141026;--card:#1c1735;--card2:#221e3d;
+  --accent:#ff6b35;--accent2:#00e5b0;--accent3:#7c5cfc;
+  --pink:#ff4fa3;--gold:#ffc843;--blue:#4fc3f7;
+  --text:#f0eeff;--muted:#6b6490;--border:#252048;
+  --radius-sm:12px;--radius-md:18px;--radius-lg:24px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --tab-height:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Sarabun',sans-serif;display:flex;flex-direction:column;}
+
+/* Ambient background */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 700px 500px at 15% -5%,rgba(124,92,252,.13) 0%,transparent 60%),
+    radial-gradient(ellipse 500px 600px at 85% 95%,rgba(255,107,53,.09) 0%,transparent 60%),
+    radial-gradient(ellipse 300px 300px at 60% 40%,rgba(0,229,176,.04) 0%,transparent 60%);}
+
+/* Noise texture */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.018;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px 180px;}
+
+.app{display:flex;flex-direction:column;height:100vh;position:relative;z-index:1;}
+
+/* ===== HEADER ===== */
+.header{
+  flex-shrink:0;
+  padding:max(52px,env(safe-area-inset-top,52px)) 20px 14px;
+  background:linear-gradient(180deg,rgba(10,7,20,.95) 0%,rgba(10,7,20,.0) 100%);
+  position:relative;z-index:10;
+}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.header-left .greeting{font-size:11px;color:var(--muted);font-family:'Prompt',sans-serif;letter-spacing:.6px;margin-bottom:2px;}
+.header-left .user-name{
+  font-size:22px;font-weight:700;font-family:'Kanit',sans-serif;line-height:1;
+  background:linear-gradient(135deg,#ff8c55,#ffc843);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.header-right{display:flex;gap:8px;align-items:center;}
+
+/* Streak badge — refined */
+.streak-badge{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,200,67,.08);
+  border:1px solid rgba(255,200,67,.25);
+  border-radius:22px;padding:6px 12px;cursor:pointer;
+  transition:background .2s,transform .15s;
+  backdrop-filter:blur(6px);
+}
+.streak-badge:active{transform:scale(.94);}
+.streak-fire{font-size:15px;animation:flicker 1.5s ease infinite;}
+@keyframes flicker{0%,100%{transform:scale(1) rotate(-2deg);}50%{transform:scale(1.12) rotate(2deg);}}
+.streak-num{font-size:13px;font-weight:700;font-family:'Kanit',sans-serif;color:var(--gold);}
+
+.avatar-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent3),var(--pink));
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;border:none;
+  transition:transform .15s,box-shadow .2s;
+  box-shadow:0 0 0 0 rgba(124,92,252,0);
+}
+.avatar-btn:active{transform:scale(.9);}
+
+/* Clock */
+.clock-row{display:flex;align-items:baseline;gap:10px;margin-bottom:2px;}
+.time-display{
+  font-family:'Kanit',sans-serif;font-size:48px;font-weight:700;letter-spacing:-3px;line-height:1;
+  background:linear-gradient(135deg,#fff 40%,rgba(255,255,255,.6));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.date-display{font-size:12px;color:var(--muted);font-family:'Prompt',sans-serif;}
+
+/* XP Bar — taller and more prominent */
+.xp-bar-wrap{
+  display:flex;align-items:center;gap:8px;
+  margin-top:10px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  border-radius:22px;padding:7px 12px;
+}
+.xp-level-badge{
+  background:linear-gradient(135deg,var(--accent3),var(--pink));
+  border-radius:10px;padding:2px 9px;
+  font-size:11px;font-weight:700;font-family:'Kanit',sans-serif;color:#fff;flex-shrink:0;
+  white-space:nowrap;
+}
+.xp-bar-bg{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;}
+.xp-bar-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--accent3),var(--pink));
+  transition:width .9s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px rgba(124,92,252,.5);
+}
+.xp-text{font-size:10px;color:var(--muted);font-family:'Prompt',sans-serif;flex-shrink:0;white-space:nowrap;}
+
+/* ===== BOTTOM TAB NAV ===== */
+.tab-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  height:calc(var(--tab-height) + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);
+  background:rgba(14,11,26,.88);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:stretch;
+}
+.tab-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border:none;background:none;cursor:pointer;
+  padding:0;color:var(--muted);
+  transition:color .2s;
+  position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.tab-btn.active{color:var(--accent);}
+.tab-btn.active .tab-icon{transform:translateY(-2px);}
+.tab-icon{font-size:22px;transition:transform .25s cubic-bezier(.34,1.56,.64,1),filter .2s;}
+.tab-label{font-size:9.5px;font-family:'Prompt',sans-serif;font-weight:500;transition:color .2s;letter-spacing:.2px;}
+
+/* Active indicator dot */
+.tab-btn::after{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--accent);border-radius:2px 2px 0 0;
+  transition:width .25s cubic-bezier(.34,1.56,.64,1);
+}
+.tab-btn.active::after{width:24px;}
+
+/* ===== CONTENT ===== */
+.content{
+  flex:1;overflow:hidden;position:relative;
+}
+
+/* Swipeable container */
+.pages-wrap{
+  display:flex;height:100%;
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+.section{
+  min-width:100%;height:100%;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:14px 16px calc(var(--tab-height) + var(--safe-bottom) + 20px);
+  scroll-behavior:smooth;
+}
+.section::-webkit-scrollbar{display:none;}
+
+/* ===== CARDS ===== */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:16px;margin-bottom:14px;
+  animation:fadeUp .4s ease both;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,255,255,.025) 0%,transparent 60%);
+  pointer-events:none;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Stagger cards */
+.section .card:nth-child(1){animation-delay:.05s;}
+.section .card:nth-child(2){animation-delay:.1s;}
+.section .card:nth-child(3){animation-delay:.15s;}
+.section .card:nth-child(4){animation-delay:.2s;}
+
+.card-title{
+  font-size:10px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:2px;font-family:'Prompt',sans-serif;margin-bottom:12px;
+  display:flex;align-items:center;gap:6px;
+}
+.card-title::before{content:'';display:inline-block;width:3px;height:10px;background:var(--accent3);border-radius:2px;}
+
+.section-header{
+  font-size:20px;font-weight:700;font-family:'Kanit',sans-serif;
+  margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;
+}
+
+/* ===== CURRENT TASK ===== */
+.current-card{
+  background:linear-gradient(135deg,rgba(124,92,252,.18),rgba(255,107,53,.1));
+  border:1px solid rgba(124,92,252,.3);border-radius:var(--radius-lg);
+  padding:20px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+  animation:fadeUp .4s ease both;
+}
+.current-card::after{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,92,252,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.cur-label{font-size:10px;color:rgba(124,92,252,.8);letter-spacing:2px;font-family:'Prompt',sans-serif;margin-bottom:5px;text-transform:uppercase;}
+.cur-time{font-size:36px;font-weight:700;font-family:'Kanit',sans-serif;line-height:1;color:rgba(255,255,255,.95);}
+.cur-task{font-size:16px;font-weight:600;margin-top:4px;line-height:1.4;}
+.next-wrap{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);}
+.next-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-bottom:4px;font-family:'Prompt',sans-serif;text-transform:uppercase;}
+.next-row{display:flex;align-items:center;gap:8px;}
+.next-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;box-shadow:0 0 6px rgba(0,229,176,.5);}
+.next-task{font-size:13px;color:var(--accent2);font-weight:500;flex:1;}
+.next-time{font-size:11px;color:var(--muted);font-family:'Prompt',sans-serif;}
+
+/* ===== PRAYER ===== */
+.prayer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.prayer-item{
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:10px 3px;text-align:center;border:1.5px solid var(--border);
+  cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1);
+  position:relative;overflow:hidden;
+}
+.prayer-item:active{transform:scale(.91);}
+.prayer-item.done{
+  background:rgba(0,229,176,.08);border-color:rgba(0,229,176,.4);
+  box-shadow:0 0 12px rgba(0,229,176,.1);
+}
+.prayer-item.done::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,229,176,.07),transparent);
+  pointer-events:none;
+}
+.prayer-name{font-size:9px;color:var(--muted);margin-bottom:2px;font-family:'Prompt',sans-serif;}
+.prayer-time{font-size:10px;font-family:'Kanit',sans-serif;color:rgba(255,255,255,.7);}
+.prayer-emoji{font-size:16px;margin-top:4px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+.prayer-item.done .prayer-emoji{transform:scale(1.1);}
+
+/* ===== QUOTE ===== */
+.quote-card{
+  background:linear-gradient(135deg,rgba(255,79,163,.08),rgba(124,92,252,.09));
+  border:1px solid rgba(255,79,163,.15);border-radius:var(--radius-md);
+  padding:20px;text-align:center;margin-bottom:14px;cursor:pointer;
+  position:relative;overflow:hidden;transition:transform .2s;
+  animation:fadeUp .4s .3s ease both;
+}
+.quote-card:active{transform:scale(.98);}
+.quote-card::before{content:'"';position:absolute;top:-14px;left:6px;font-size:90px;color:rgba(255,79,163,.06);font-family:'Kanit',sans-serif;line-height:1;pointer-events:none;}
+.quote-text{font-size:14px;line-height:1.9;position:relative;z-index:1;color:rgba(255,255,255,.88);}
+.quote-source{font-size:11px;color:var(--pink);margin-top:8px;font-family:'Prompt',sans-serif;}
+.quote-hint{font-size:10px;color:rgba(255,255,255,.2);margin-top:4px;font-family:'Prompt',sans-serif;}
+
+/* ===== HABIT ===== */
+.habit-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.habit-item:last-child{border-bottom:none;}
+.habit-toggle{
+  width:28px;height:28px;border-radius:9px;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .22s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;font-size:14px;
+  background:var(--surface);
+}
+.habit-toggle:active{transform:scale(.85);}
+.habit-toggle.checked{
+  background:linear-gradient(135deg,var(--accent2),#00bcd4);
+  border-color:transparent;box-shadow:0 3px 12px rgba(0,229,176,.25);
+}
+.habit-name{font-size:14px;flex:1;line-height:1.4;}
+.habit-name.done{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.2);}
+.habit-xp{font-size:11px;color:var(--accent3);font-family:'Kanit',sans-serif;white-space:nowrap;}
+
+/* ===== GOALS ===== */
+.goal-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.goal-item:last-child{border-bottom:none;}
+.goal-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.goal-text{flex:1;}
+.goal-title{font-size:13px;font-weight:600;}
+.goal-sub{font-size:11px;color:var(--muted);margin-top:2px;font-family:'Prompt',sans-serif;line-height:1.5;}
+.progress-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:8px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;transition:width 1.4s cubic-bezier(.4,0,.2,1);}
+
+/* ===== STATS GRID ===== */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 12px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.02),transparent);pointer-events:none;}
+.stat-value{
+  font-size:28px;font-weight:700;font-family:'Kanit',sans-serif;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stat-label{font-size:10px;color:var(--muted);margin-top:3px;font-family:'Prompt',sans-serif;}
+
+/* ===== HABIT GRAPH ===== */
+.graph-wrap{display:flex;align-items:flex-end;gap:5px;height:64px;margin-top:4px;}
+.graph-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.graph-bar{width:100%;border-radius:5px;background:rgba(255,255,255,.06);position:relative;overflow:hidden;min-height:4px;}
+.graph-bar-fill{position:absolute;bottom:0;width:100%;border-radius:5px;transition:height .9s cubic-bezier(.4,0,.2,1);}
+.graph-day{font-size:9px;color:var(--muted);font-family:'Prompt',sans-serif;}
+
+/* ===== JOURNAL ===== */
+/* Mood buttons */
+.mood-selector{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.mood-btn{
+  font-size:24px;border:2px solid transparent;border-radius:12px;
+  cursor:pointer;padding:4px 6px;background:rgba(255,255,255,.04);
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+}
+.mood-btn:active,.mood-btn.selected{
+  border-color:var(--accent3);
+  background:rgba(124,92,252,.15);
+  transform:scale(1.12);
+}
+.selected-mood-label{
+  font-size:11px;color:var(--accent3);font-family:'Prompt',sans-serif;
+  margin-bottom:10px;min-height:16px;
+}
+.journal-textarea{
+  width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);
+  font-family:'Sarabun',sans-serif;font-size:14px;outline:none;resize:none;height:100px;
+  line-height:1.7;transition:border-color .2s;
+}
+.journal-textarea:focus{border-color:rgba(124,92,252,.5);}
+.journal-textarea::placeholder{color:var(--muted);}
+
+/* Journal history */
+.journal-entry{
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.journal-entry:last-child{border-bottom:none;}
+.journal-date{font-size:10px;color:var(--muted);font-family:'Prompt',sans-serif;margin-bottom:5px;}
+.journal-mood-text{display:flex;align-items:flex-start;gap:8px;}
+.journal-mood{font-size:18px;flex-shrink:0;margin-top:1px;}
+.journal-text{font-size:13px;line-height:1.7;color:rgba(255,255,255,.8);}
+
+/* ===== COUNTDOWN ===== */
+.countdown-item{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.countdown-item:last-child{border-bottom:none;}
+.countdown-days-wrap{
+  min-width:54px;text-align:center;
+  background:rgba(255,255,255,.04);border-radius:var(--radius-sm);padding:6px 4px;
+}
+.countdown-days{font-size:26px;font-weight:700;font-family:'Kanit',sans-serif;color:var(--gold);line-height:1;}
+.countdown-days-label{font-size:8px;color:var(--muted);font-family:'Prompt',sans-serif;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+.countdown-info{flex:1;}
+.countdown-name{font-size:13px;font-weight:600;}
+.countdown-date{font-size:11px;color:var(--muted);font-family:'Prompt',sans-serif;margin-top:2px;}
+.countdown-del{background:none;border:none;color:rgba(255,255,255,.18);font-size:18px;cursor:pointer;padding:4px 6px;transition:color .2s;}
+.countdown-del:hover{color:#ff6b6b;}
+
+/* Empty state */
+.empty-state{
+  text-align:center;padding:32px 16px;
+}
+.empty-state .empty-icon{font-size:40px;margin-bottom:10px;opacity:.6;}
+.empty-state .empty-title{font-size:14px;color:rgba(255,255,255,.5);font-family:'Kanit',sans-serif;margin-bottom:4px;}
+.empty-state .empty-sub{font-size:12px;color:var(--muted);font-family:'Prompt',sans-serif;line-height:1.6;}
+
+/* ===== PROFILE ===== */
+.profile-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.profile-item:last-child{border-bottom:none;}
+.profile-label{font-size:12px;color:var(--muted);font-family:'Prompt',sans-serif;}
+.profile-value{font-size:12px;font-weight:500;text-align:right;max-width:58%;color:rgba(255,255,255,.85);}
+
+/* ===== CHIPS ===== */
+.chip{display:inline-block;padding:5px 11px;border-radius:18px;font-size:11px;background:rgba(124,92,252,.1);color:var(--accent3);border:1px solid rgba(124,92,252,.2);margin:3px;}
+.chip.green{background:rgba(0,229,176,.08);color:var(--accent2);border-color:rgba(0,229,176,.2);}
+
+/* ===== BUTTONS ===== */
+.save-btn{
+  width:100%;padding:14px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--accent),#ff9a5c);
+  border:none;color:#fff;font-size:15px;font-weight:700;
+  font-family:'Kanit',sans-serif;cursor:pointer;margin-top:10px;
+  transition:transform .15s,box-shadow .2s;
+  box-shadow:0 4px 20px rgba(255,107,53,.3);
+}
+.save-btn:active{transform:scale(.97);box-shadow:0 2px 10px rgba(255,107,53,.2);}
+.add-btn{
+  width:100%;padding:10px;border-radius:var(--radius-sm);
+  background:rgba(124,92,252,.08);border:1.5px dashed rgba(124,92,252,.25);
+  color:var(--accent3);font-size:13px;cursor:pointer;
+  font-family:'Sarabun',sans-serif;margin-top:10px;transition:background .2s;
+}
+.add-btn:active{background:rgba(124,92,252,.14);}
+.notif-btn{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);
+  border-radius:var(--radius-sm);padding:13px 16px;cursor:pointer;width:100%;
+  font-family:'Sarabun',sans-serif;font-size:13px;color:var(--text);margin-bottom:10px;
+  transition:background .2s;
+}
+.notif-btn:active{background:rgba(255,107,53,.16);}
+
+/* ===== ROUTINE EDIT ===== */
+.routine-edit-item{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.routine-edit-item:last-child{border-bottom:none;}
+.time-input,.task-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-family:'Kanit',sans-serif;font-size:12px;outline:none;transition:border-color .2s;}
+.time-input{width:70px;flex-shrink:0;text-align:center;}
+.task-input{flex:1;font-family:'Sarabun',sans-serif;}
+.time-input:focus,.task-input:focus{border-color:rgba(124,92,252,.4);}
+.del-btn{background:none;border:none;color:rgba(255,107,107,.5);font-size:20px;cursor:pointer;padding:0 4px;transition:color .2s;flex-shrink:0;}
+.del-btn:hover{color:#ff6b6b;}
+
+/* ===== TOGGLE ===== */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;}
+.toggle-wrap{position:relative;width:44px;height:26px;cursor:pointer;flex-shrink:0;}
+.toggle-track{position:absolute;inset:0;border-radius:13px;background:rgba(255,255,255,.07);border:1.5px solid var(--border);transition:.3s;}
+.toggle-track.on{background:rgba(0,229,176,.18);border-color:var(--accent2);}
+.toggle-knob{position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:.3s;}
+.toggle-knob.on{transform:translateX(18px);background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.3);}
+
+/* ===== FIELD ===== */
+.field{margin-bottom:14px;}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:6px;font-family:'Prompt',sans-serif;letter-spacing:.3px;}
+.field input,.field textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.field input:focus,.field textarea:focus{border-color:rgba(124,92,252,.5);box-shadow:0 0 0 3px rgba(124,92,252,.08);}
+.field textarea{resize:none;}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  align-items:flex-end;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:28px 28px 0 0;padding:20px 18px max(20px, var(--safe-bottom));
+  width:100%;max-width:440px;max-height:90vh;overflow-y:auto;
+  animation:slideUp .32s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-handle{width:36px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-size:17px;font-weight:700;font-family:'Kanit',sans-serif;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:rgba(255,255,255,.07);border:none;color:var(--muted);width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.modal-close:active{background:rgba(255,255,255,.12);}
+
+/* ===== HABIT GRAPH ===== */
+
+/* ===== LEVEL UP SPLASH ===== */
+#levelSplash{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,.88);backdrop-filter:blur(10px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+}
+#levelSplash.show{opacity:1;pointer-events:all;}
+.level-up-content{text-align:center;}
+.level-up-emoji{font-size:80px;animation:bounce 1s ease infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-15px);}}
+.level-up-title{font-size:14px;color:var(--gold);font-family:'Prompt',sans-serif;letter-spacing:4px;margin-top:14px;text-transform:uppercase;}
+.level-up-num{font-size:72px;font-weight:700;font-family:'Kanit',sans-serif;background:linear-gradient(135deg,#fff700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.level-up-name{font-size:20px;font-weight:600;font-family:'Kanit',sans-serif;color:var(--text);margin-top:4px;}
+.level-up-skip{margin-top:32px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.4);padding:11px 30px;border-radius:28px;font-size:14px;font-family:'Sarabun',sans-serif;cursor:pointer;transition:background .2s;}
+.level-up-skip:active{background:rgba(255,255,255,.12);}
+
+/* ===== STREAK SPLASH ===== */
+#streakSplash{
+  position:fixed;inset:0;z-index:500;
+  background:radial-gradient(ellipse at center,rgba(15,10,30,.97) 0%,rgba(5,3,15,.99) 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+}
+#streakSplash.show{opacity:1;pointer-events:all;}
+.splash-content{display:flex;flex-direction:column;align-items:center;position:relative;}
+.big-fire{width:140px;height:180px;position:relative;}
+.big-fire svg{width:100%;height:100%;}
+.fire-off .fm,.fire-off .fm2,.fire-off .ft{fill:#3a3550!important;}
+.fire-off .ember{opacity:0!important;}
+@keyframes fireFlicker{
+  0%{transform:scaleX(1) scaleY(1) rotate(-1deg);}
+  30%{transform:scaleX(.94) scaleY(1.04) rotate(1.5deg);}
+  60%{transform:scaleX(1.04) scaleY(.97) rotate(-1deg);}
+  100%{transform:scaleX(1) scaleY(1) rotate(-1deg);}
+}
+@keyframes flameRise{
+  0%{transform:scaleY(0) translateY(30px);opacity:0;}
+  70%{transform:scaleY(1.1) translateY(-6px);opacity:1;}
+  100%{transform:scaleY(1) translateY(0);opacity:1;}
+}
+@keyframes glowPulse{
+  0%,100%{filter:drop-shadow(0 0 18px rgba(255,140,0,.6)) drop-shadow(0 0 35px rgba(255,70,0,.3));}
+  50%{filter:drop-shadow(0 0 30px rgba(255,200,0,.8)) drop-shadow(0 0 55px rgba(255,110,0,.5));}
+}
+.fire-lit{animation:fireFlicker 1.2s ease infinite,glowPulse 2s ease infinite;}
+.fire-igniting{animation:flameRise .5s cubic-bezier(.34,1.56,.64,1) forwards,glowPulse 2s ease infinite .5s;}
+.fire-ring{position:absolute;width:180px;height:180px;border-radius:50%;border:2px solid rgba(255,140,0,.25);animation:ringExpand 2s ease infinite;top:50%;left:50%;transform:translate(-50%,-50%);}
+@keyframes ringExpand{0%{transform:translate(-50%,-50%) scale(.8);opacity:.5;}100%{transform:translate(-50%,-50%) scale(1.6);opacity:0;}}
+.fire-ring2{animation-delay:.8s;}
+.spark{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;}
+@keyframes sparkFly{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:var(--tx) var(--ty) scale(0);opacity:0;}}
+.splash-num{font-size:86px;font-weight:700;font-family:'Kanit',sans-serif;background:linear-gradient(135deg,#fff700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;filter:drop-shadow(0 0 18px rgba(255,180,0,.5));opacity:0;}
+.splash-num.show{opacity:1;animation:numPop .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes numPop{from{transform:scale(0) rotate(-10deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+.splash-label{font-size:17px;font-family:'Sarabun',sans-serif;font-weight:600;color:rgba(255,255,255,.8);margin-top:5px;letter-spacing:1px;}
+.splash-sub{font-size:12px;color:rgba(255,255,255,.4);font-family:'Prompt',sans-serif;margin-top:3px;}
+.splash-skip{position:absolute;bottom:55px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.45);padding:10px 26px;border-radius:28px;font-size:13px;font-family:'Sarabun',sans-serif;cursor:pointer;}
+
+/* ===== STREAK MODAL ===== */
+.streak-display{text-align:center;padding:16px 0;}
+.streak-big{font-size:64px;animation:flicker 1.5s ease infinite;}
+.streak-count{font-size:44px;font-weight:700;font-family:'Kanit',sans-serif;color:var(--gold);}
+.streak-text{font-size:14px;color:var(--muted);font-family:'Prompt',sans-serif;margin-top:5px;}
+.streak-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:14px;}
+.s-day{aspect-ratio:1;border-radius:7px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);}
+.s-day.active{background:rgba(255,200,67,.16);border-color:rgba(255,200,67,.4);}
+.s-day.today-day{background:linear-gradient(135deg,rgba(255,107,53,.28),rgba(255,200,67,.18));border-color:var(--accent);color:#fff;font-weight:700;}
+
+/* ===== PET ===== */
+.pet-wrap{
+  position:fixed;bottom:calc(var(--tab-height) + var(--safe-bottom) - 4px);right:16px;
+  z-index:50;width:72px;height:72px;cursor:pointer;
+  filter:drop-shadow(0 3px 12px rgba(124,92,252,.3));
+  transition:filter .2s;
+}
+.pet-wrap:active{transform:scale(.9);}
+.pet-canvas{width:72px;height:72px;}
+.pet-bubble{
+  position:absolute;bottom:70px;right:0;
+  background:rgba(20,16,38,.97);border:1px solid var(--border);
+  border-radius:14px 14px 0 14px;padding:8px 12px;
+  font-size:12px;font-family:'Sarabun',sans-serif;color:var(--text);
+  white-space:normal;max-width:170px;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);
+  animation:bubblePop .25s cubic-bezier(.34,1.56,.64,1);display:none;
+  line-height:1.5;
+}
+@keyframes bubblePop{from{transform:scale(.8) translateY(5px);opacity:0;}to{transform:scale(1);opacity:1;}}
+.pet-bubble.show{display:block;}
+
+/* ===== TOAST ===== */
+#toast{
+  position:fixed;bottom:calc(var(--tab-height) + var(--safe-bottom) + 12px);
+  left:50%;transform:translateX(-50%);
+  background:rgba(22,18,42,.97);color:#fff;padding:10px 20px;
+  border-radius:22px;font-size:13px;z-index:999;
+  border:1px solid rgba(255,255,255,.08);
+  font-family:'Sarabun',sans-serif;
+  box-shadow:0 6px 24px rgba(0,0,0,.5);
+  transition:opacity .3s,transform .3s;
+  pointer-events:none;opacity:0;white-space:nowrap;
+  backdrop-filter:blur(10px);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+/* ===== SWIPE INDICATOR ===== */
+.swipe-hint{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;pointer-events:none;z-index:5;
+}
+.swipe-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s;}
+.swipe-dot.active{width:18px;background:var(--accent);border-radius:3px;}
+
+/* ===== SECTION TRANSITION ===== */
+.pages-wrap{transition:transform .35s cubic-bezier(.4,0,.2,1);}
+.pages-wrap.no-transition{transition:none;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="greeting">السلام عليكم,</div>
+        <div class="user-name" id="headerName">MyDash</div>
+      </div>
+      <div class="header-right">
+        <div class="streak-badge" onclick="openModal('streakModal')">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-num" id="streakNum">0</span>
+        </div>
+        <button class="avatar-btn" onclick="openModal('profileModal')">✏️</button>
+      </div>
+    </div>
+    <div class="clock-row">
+      <div class="time-display" id="clock">00:00</div>
+    </div>
+    <div class="date-display" id="dateDisplay">--</div>
+    <div class="xp-bar-wrap">
+      <div class="xp-level-badge" id="levelBadge">🌱 Lv.1</div>
+      <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div>
+      <div class="xp-text" id="xpText">0/100 XP</div>
+    </div>
+  </div>
+
+  <!-- CONTENT — swipeable pages -->
+  <div class="content" id="contentArea">
+    <div class="pages-wrap" id="pagesWrap">
+
+      <!-- PAGE 0: TODAY -->
+      <div class="section" id="today">
+        <div class="current-card">
+          <div class="cur-label">⏱ กำลังทำอยู่ตอนนี้</div>
+          <div class="cur-time" id="curTime">--:--</div>
+          <div class="cur-task" id="curTask">กำลังโหลด...</div>
+          <div class="next-wrap" id="nextWrap">
+            <div class="next-label">▸ ถัดไป</div>
+            <div class="next-row">
+              <div class="next-dot"></div>
+              <div class="next-task" id="nextTask">--</div>
+              <div class="next-time" id="nextTime">--:--</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">ละหมาดวันนี้</div>
+          <div class="prayer-grid" id="prayerGrid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">นิสัย 7 วันที่ผ่านมา</div>
+          <div class="graph-wrap" id="habitGraph"></div>
+        </div>
+
+        <div class="quote-card" onclick="rotateQuote()">
+          <div class="quote-text" id="quoteText"></div>
+          <div class="quote-source" id="quoteSource"></div>
+          <div class="quote-hint">แตะเพื่อเปลี่ยน ✨</div>
+        </div>
+      </div>
+
+      <!-- PAGE 1: GOALS -->
+      <div class="section" id="goals">
+        <div class="section-header">🎯 เป้าหมาย</div>
+        <div class="card">
+          <div class="card-title">เป้าหมายระยะสั้น</div>
+          <div class="goal-item"><div class="goal-icon" style="background:rgba(124,92,252,.15)">💪</div><div class="goal-text"><div class="goal-title">สุขภาพแข็งแรง</div><div class="goal-sub">ออกกำลังกายทุกวัน เล่นบอลสม่ำเสมอ</div><div class="progress-bar"><div class="progress-fill" style="width:40%;background:linear-gradient(90deg,var(--accent3),var(--pink))"></div></div></div></div>
+          <div class="goal-item"><div class="goal-icon" style="background:rgba(0,229,176,.12)">🎓</div><div class="goal-text"><div class="goal-title">เรียนดีพอ ไม่เครียดเกิน</div><div class="goal-sub">เกรดดี มีชีวิต balance</div><div class="progress-bar"><div class="progress-fill" style="width:10%;background:linear-gradient(90deg,var(--accent2),var(--blue))"></div></div></div></div>
+          <div class="goal-item"><div class="goal-icon" style="background:rgba(255,200,67,.12)">🕌</div><div class="goal-text"><div class="goal-title">ความรู้ศาสนาอิสลาม</div><div class="goal-sub">ละหมาด 5 เวลา ท่องจำอัลกุรอาน</div><div class="progress-bar"><div class="progress-fill" style="width:50%;background:linear-gradient(90deg,var(--gold),var(--accent))"></div></div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">เป้าหมายระยะยาว</div>
+          <div class="goal-item"><div class="goal-icon" style="background:rgba(255,107,53,.12)">💰</div><div class="goal-text"><div class="goal-title">เก็บเงินสู่ขอ 150,000 บาท</div><div class="goal-sub">อายุ ~23 ปี / 2,500 บาท/เดือน</div><div class="progress-bar"><div class="progress-fill" style="width:2%;background:linear-gradient(90deg,var(--accent),var(--gold))"></div></div></div></div>
+          <div class="goal-item"><div class="goal-icon" style="background:rgba(79,195,247,.12)">📈</div><div class="goal-text"><div class="goal-title">เริ่มลงทุนหุ้น</div><div class="goal-sub">เป้าอายุ 20 ปี — ศึกษาก่อนลงมือ</div><div class="progress-bar"><div class="progress-fill" style="width:5%;background:linear-gradient(90deg,var(--blue),var(--accent3))"></div></div></div></div>
+          <div class="goal-item"><div class="goal-icon" style="background:rgba(0,229,176,.12)">✈️</div><div class="goal-text"><div class="goal-title">เที่ยวรอบโลก</div><div class="goal-sub">ทำงาน AI/โค้ด มีรายได้ดี</div><div class="progress-bar"><div class="progress-fill" style="width:1%;background:linear-gradient(90deg,var(--accent2),var(--blue))"></div></div></div></div>
+          <div class="goal-item"><div class="goal-icon" style="background:rgba(255,200,67,.12)">💍</div><div class="goal-text"><div class="goal-title">แต่งงาน — สร้างครอบครัว</div><div class="goal-sub">แต่งงานเร็ว สอนลูกเรื่องศาสนา</div><div class="progress-bar"><div class="progress-fill" style="width:5%;background:linear-gradient(90deg,var(--gold),var(--pink))"></div></div></div></div>
+        </div>
+        <div class="card"><div class="card-title">ทักษะที่พัฒนา</div><div style="padding-top:4px"><span class="chip">Python</span><span class="chip">AI/ML</span><span class="chip green">ภาษาอังกฤษ</span><span class="chip green">คณิตศาสตร์</span><span class="chip">การลงทุน</span><span class="chip green">TikTok</span><span class="chip">ฟิสิกส์</span><span class="chip green">ฟุตบอล</span></div></div>
+      </div>
+
+      <!-- PAGE 2: HABITS -->
+      <div class="section" id="habits">
+        <div class="section-header">✅ นิสัยประจำวัน</div>
+        <div class="card">
+          <div class="card-title">วันนี้ทำแล้วหรือยัง?</div>
+          <div id="habitList"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">สถิติวันนี้</div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="habitCount">0/7</div><div class="stat-label">นิสัยที่ทำแล้ว</div></div>
+            <div class="stat-card"><div class="stat-value" id="prayerStat">0/5</div><div class="stat-label">ละหมาดแล้ว</div></div>
+            <div class="stat-card"><div class="stat-value" id="xpToday">0</div><div class="stat-label">XP วันนี้</div></div>
+            <div class="stat-card"><div class="stat-value" id="streakStatNum">0</div><div class="stat-label">Streak 🔥</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 3: JOURNAL -->
+      <div class="section" id="journal">
+        <div class="section-header">📓 Journal</div>
+        <div class="card">
+          <div class="card-title">บันทึกวันนี้</div>
+          <div class="mood-selector" id="moodBtns">
+            <button class="mood-btn selected" onclick="setMood('😊',this)" title="สุขดี">😊</button>
+            <button class="mood-btn" onclick="setMood('😄',this)" title="มีความสุขมาก">😄</button>
+            <button class="mood-btn" onclick="setMood('😐',this)" title="ปกติ">😐</button>
+            <button class="mood-btn" onclick="setMood('😔',this)" title="เศร้า">😔</button>
+            <button class="mood-btn" onclick="setMood('😤',this)" title="เครียด">😤</button>
+          </div>
+          <div class="selected-mood-label" id="selectedMood">Mood: 😊</div>
+          <textarea class="journal-textarea" id="journalInput" placeholder="วันนี้เป็นยังไงบ้าง? 📝"></textarea>
+          <button class="save-btn" onclick="saveJournal()">💾 บันทึก (+10 XP)</button>
+        </div>
+        <div class="card">
+          <div class="card-title">ประวัติ Journal</div>
+          <div id="journalList"></div>
+        </div>
+      </div>
+
+      <!-- PAGE 4: COUNTDOWN -->
+      <div class="section" id="countdown">
+        <div class="section-header">⏳ Countdown</div>
+        <div class="card">
+          <div class="card-title">เพิ่มเป้าหมาย</div>
+          <div class="field"><label>ชื่อเป้าหมาย</label><input id="cd-name" type="text" placeholder="เช่น วันเปิดเทอม"></div>
+          <div class="field"><label>วันที่เป้าหมาย</label><input id="cd-date" type="date"></div>
+          <button class="save-btn" onclick="addCountdown()">+ เพิ่ม Countdown</button>
+        </div>
+        <div class="card">
+          <div class="card-title">เป้าหมายของฉัน</div>
+          <div id="countdownList"></div>
+        </div>
+      </div>
+
+      <!-- PAGE 5: SETTINGS -->
+      <div class="section" id="settings">
+        <div class="section-header">⚙️ ตั้งค่า</div>
+        <div class="card">
+          <div class="card-title">การแจ้งเตือน</div>
+          <button class="notif-btn" onclick="requestNotif()"><span style="font-size:20px">🔔</span><span id="notifText">เปิดการแจ้งเตือน</span></button>
+          <p style="font-size:11px;color:var(--muted);line-height:1.8;font-family:'Prompt',sans-serif">ต้องติดตั้งแอปก่อน (Add to Home Screen) และใช้ iOS 16.4+</p>
+        </div>
+        <div class="card">
+          <div class="card-title">เสียง</div>
+          <div class="toggle-row">
+            <span style="font-size:13px">เสียงเมื่อติ๊กสำเร็จ</span>
+            <div class="toggle-wrap" onclick="toggleSound()"><div class="toggle-track" id="soundTrack"></div><div class="toggle-knob" id="soundKnob"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">แก้ไข Routine</div>
+          <div id="routineEditList"></div>
+          <button class="add-btn" onclick="addRoutine()">+ เพิ่มกิจกรรม</button>
+          <button class="save-btn" style="margin-top:10px" onclick="saveRoutine()">💾 บันทึก Routine</button>
+        </div>
+        <div class="card">
+          <div class="card-title">โปรไฟล์</div>
+          <div id="profileView"></div>
+          <button class="save-btn" onclick="openModal('profileModal')">✏️ แก้ไขโปรไฟล์</button>
+        </div>
+      </div>
+
+    </div><!-- /pages-wrap -->
+  </div><!-- /content -->
+
+  <!-- SWIPE DOTS -->
+  <div class="swipe-hint" id="swipeDots">
+    <div class="swipe-dot active"></div>
+    <div class="swipe-dot"></div>
+    <div class="swipe-dot"></div>
+    <div class="swipe-dot"></div>
+    <div class="swipe-dot"></div>
+    <div class="swipe-dot"></div>
+  </div>
+
+  <!-- BOTTOM TAB NAV -->
+  <nav class="tab-nav" id="tabNav">
+    <button class="tab-btn active" onclick="goPage(0,this)">
+      <span class="tab-icon">🌅</span>
+      <span class="tab-label">วันนี้</span>
+    </button>
+    <button class="tab-btn" onclick="goPage(1,this)">
+      <span class="tab-icon">🎯</span>
+      <span class="tab-label">เป้าหมาย</span>
+    </button>
+    <button class="tab-btn" onclick="goPage(2,this)">
+      <span class="tab-icon">✅</span>
+      <span class="tab-label">นิสัย</span>
+    </button>
+    <button class="tab-btn" onclick="goPage(3,this)">
+      <span class="tab-icon">📓</span>
+      <span class="tab-label">Journal</span>
+    </button>
+    <button class="tab-btn" onclick="goPage(4,this)">
+      <span class="tab-icon">⏳</span>
+      <span class="tab-label">Countdown</span>
+    </button>
+    <button class="tab-btn" onclick="goPage(5,this)">
+      <span class="tab-icon">⚙️</span>
+      <span class="tab-label">ตั้งค่า</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal" onclick="closeModalOut(event,'profileModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ แก้ไขโปรไฟล์ <button class="modal-close" onclick="closeModal('profileModal')">✕</button></div>
+    <div class="field"><label>ชื่อ</label><input id="f-name" type="text"></div>
+    <div class="field"><label>อายุ</label><input id="f-age" type="text"></div>
+    <div class="field"><label>มหาวิทยาลัย</label><input id="f-uni" type="text"></div>
+    <div class="field"><label>คณะ/สาขา</label><input id="f-faculty" type="text"></div>
+    <div class="field"><label>ศาสนา</label><input id="f-religion" type="text"></div>
+    <div class="field"><label>เงินเก็บ</label><input id="f-savings" type="text"></div>
+    <div class="field"><label>รายได้</label><input id="f-income" type="text"></div>
+    <div class="field"><label>เป้าหมายเงิน</label><input id="f-moneygoal" type="text"></div>
+    <div class="field"><label>โน้ต</label><textarea id="f-notes" style="height:70px"></textarea></div>
+    <button class="save-btn" onclick="saveProfile()">💾 บันทึก</button>
+  </div>
+</div>
+
+<!-- STREAK MODAL -->
+<div class="modal-overlay" id="streakModal" onclick="closeModalOut(event,'streakModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔥 Streak <button class="modal-close" onclick="closeModal('streakModal')">✕</button></div>
+    <div class="streak-display">
+      <div class="streak-big">🔥</div>
+      <div class="streak-count" id="streakBig">0</div>
+      <div class="streak-text" id="streakText">วันแรก!</div>
+    </div>
+    <div class="streak-calendar" id="streakCal"></div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;font-family:'Prompt',sans-serif;line-height:1.8">เข้าแอปทุกวันรักษาไฟ 🔥<br>ขาดแม้วันเดียวไฟจะดับ 💧</p>
+  </div>
+</div>
+
+<!-- STREAK SPLASH -->
+<div id="streakSplash">
+  <div class="fire-ring"></div><div class="fire-ring fire-ring2"></div>
+  <div class="splash-content">
+    <div class="big-fire fire-off" id="bigFire">
+      <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+        <circle class="ember" cx="30" cy="100" r="3" fill="#ff8c00" opacity=".7"><animate attributeName="cy" values="100;58;100" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".7;0;.7" dur="2s" repeatCount="indefinite"/></circle>
+        <circle class="ember" cx="70" cy="95" r="2" fill="#ffcc00" opacity=".6"><animate attributeName="cy" values="95;48;95" dur="1.7s" repeatCount="indefinite" begin=".5s"/><animate attributeName="opacity" values=".6;0;.6" dur="1.7s" repeatCount="indefinite" begin=".5s"/></circle>
+        <circle class="ember" cx="50" cy="105" r="2.5" fill="#ff6600" opacity=".8"><animate attributeName="cy" values="105;52;105" dur="2.3s" repeatCount="indefinite" begin="1s"/><animate attributeName="opacity" values=".8;0;.8" dur="2.3s" repeatCount="indefinite" begin="1s"/></circle>
+        <path class="fm" d="M50 125 C20 125 5 100 10 75 C15 55 25 50 30 35 C35 20 32 5 40 0 C40 20 45 25 45 35 C48 20 55 10 60 0 C62 18 58 30 65 45 C72 60 90 65 88 90 C85 112 75 125 50 125Z" fill="#ff4500"><animateTransform attributeName="transform" type="scale" values="1 1;.97 1.02;1.02 .98;1 1" dur="1.5s" repeatCount="indefinite" additive="sum"/></path>
+        <path class="fm2" d="M50 115 C30 115 20 95 23 78 C26 63 38 58 40 45 C43 32 42 22 48 15 C49 30 52 35 54 45 C58 30 62 22 66 15 C68 30 64 45 70 58 C76 70 82 80 78 95 C74 110 68 115 50 115Z" fill="#ff7f00"><animateTransform attributeName="transform" type="scale" values="1 1;1.02 .98;.98 1.02;1 1" dur="1.2s" repeatCount="indefinite" additive="sum"/></path>
+        <path class="ft" d="M50 100 C38 100 32 88 35 76 C38 65 46 62 48 52 C50 62 56 68 62 76 C66 85 62 100 50 100Z" fill="#ffe000"><animateTransform attributeName="transform" type="scale" values="1 1;.96 1.04;1.03 .97;1 1" dur=".9s" repeatCount="indefinite" additive="sum"/></path>
+        <ellipse cx="50" cy="90" rx="8" ry="10" fill="rgba(255,255,220,.55)"><animate attributeName="ry" values="10;12;10" dur="1s" repeatCount="indefinite"/></ellipse>
+      </svg>
+    </div>
+    <div class="splash-num" id="splashNum">0</div>
+    <div class="splash-label">วันติดต่อกัน 🎉</div>
+    <div class="splash-sub" id="splashSub">รักษาไฟนี้ไว้!</div>
+  </div>
+  <button class="splash-skip" onclick="closeSplash()">แตะเพื่อไปต่อ →</button>
+</div>
+
+<!-- LEVEL UP SPLASH -->
+<div id="levelSplash">
+  <div class="level-up-content">
+    <div class="level-up-emoji">⭐</div>
+    <div class="level-up-title">LEVEL UP!</div>
+    <div class="level-up-num" id="lvlNum">2</div>
+    <div class="level-up-name" id="lvlName">นักผจญภัย</div>
+  </div>
+  <button class="level-up-skip" onclick="closeLevelSplash()">ไปต่อ! 🚀</button>
+</div>
+
+<!-- ANIME PET -->
+<div class="pet-wrap" id="petWrap" onclick="petTap()">
+  <canvas class="pet-canvas" id="petCanvas" width="76" height="76"></canvas>
+  <div class="pet-bubble" id="petBubble">สวัสดี! 🐱</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===== CONSTANTS =====
+const PRAYERS_DATA=[{id:'subh',name:'ซุบฮฺ',time:'05:20'},{id:'zuhr',name:'ซุฮฺร์',time:'12:10'},{id:'asr',name:'อัศร์',time:'15:30'},{id:'maghrib',name:'มัฆริบ',time:'18:20'},{id:'isha',name:'อิชาอ์',time:'19:30'}];
+const HABITS_DATA=['🏃 ออกกำลังกาย/วิ่ง','🕌 ละหมาดครบ 5 เวลา','📖 อ่านอัลกุรอาน','💻 ฝึกโค้ด/อ่านหนังสือ','📱 ลงคลิป TikTok','🌐 ฝึกภาษาอังกฤษ','⚽ เล่นบอล'];
+const HABIT_XP=15;const PRAYER_XP=10;const JOURNAL_XP=10;
+const LEVELS=[
+  {min:0,name:'มือใหม่',emoji:'🌱'},{min:100,name:'นักผจญภัย',emoji:'⚔️'},
+  {min:300,name:'นักรบ',emoji:'🛡️'},{min:600,name:'อัศวิน',emoji:'🏇'},
+  {min:1000,name:'วีรบุรุษ',emoji:'🦸'},{min:1500,name:'ตำนาน',emoji:'👑'},
+  {min:2500,name:'เทพ',emoji:'✨'},{min:4000,name:'ไม่มีที่สิ้นสุด',emoji:'🌟'},
+];
+const DEFAULT_ROUTINE=[{h:'05:00',t:'ตื่น — ละหมาดซุบฮฺ'},{h:'05:30',t:'🏃 วิ่ง/ออกกำลังกาย'},{h:'06:45',t:'📖 อ่านศาสนา/ท่องจำ'},{h:'07:15',t:'💻 อังกฤษ/คณิต/โค้ด'},{h:'08:00',t:'📱 TikTok/ปักตะกร้า'},{h:'12:00',t:'🕌 ละหมาดซุฮฺร์ — พัก'},{h:'13:30',t:'💻 ฝึกโค้ด/อ่านหนังสือ'},{h:'16:30',t:'🕌 ละหมาดอัศร์'},{h:'17:00',t:'⚽ เล่นบอล'},{h:'19:00',t:'🕌 มัฆริบ — กินข้าว'},{h:'20:00',t:'❤️ คุยกับแฟน'},{h:'21:00',t:'🕌 อิชาอ์ — อัลกุรอาน'},{h:'21:30',t:'💡 เรียนโค้ด/อ่านหนังสือ'},{h:'22:30',t:'😴 นอน'}];
+const DEFAULT_PROFILE={name:'กีม',age:'18 ปี 5 เดือน',uni:'ม.วลัยลักษณ์',faculty:'วิศวกรรมคอมพิวเตอร์ & AI',religion:'อิสลาม',savings:'~2,000 บาท',income:'TikTok + ปักตะกร้า',moneygoal:'150,000 บาท',notes:''};
+const QUOTES=[
+  {t:'"คนที่ไม่มีวินัยในวันนี้<br>จะไม่มีอิสรภาพในวันพรุ่งนี้"',s:'— แรงบันดาลใจ'},
+  {t:'"إِنَّ مَعَ الْعُسْرِ يُسْرًا<br>หลังความยาก ย่อมมีความสะดวก"',s:'— อัล-กุรอาน 94:6'},
+  {t:'"เริ่มเล็ก ทำสม่ำเสมอ<br>ผลลัพธ์ยิ่งใหญ่จะตามมาเอง"',s:'— หลักพัฒนาตัวเอง'},
+  {t:'"ทุกผู้เชี่ยวชาญ<br>เคยเป็นมือใหม่มาก่อน"',s:'— แรงบันดาลใจ'},
+  {t:'"الوقت كالسيف<br>เวลาเหมือนดาบ ต้องใช้ให้เป็น"',s:'— ภาษิตอาหรับ'},
+  {t:'"ความฝันไม่มีวันหมดอายุ<br>แค่ต้องลงมือทำ"',s:'— แรงบันดาลใจ'},
+  {t:'"จงอ่อนน้อมต่ออัลลอฮ์<br>แล้วพระองค์จะทรงยกระดับเจ้า"',s:'— ปรัชญาอิสลาม'},
+  {t:'"ความสำเร็จคือผลรวม<br>ของความพยายามเล็กๆ ทุกวัน"',s:'— Robert Collier'},
+  {t:'"อย่ากลัวที่จะเริ่มช้า<br>กลัวแค่ว่าจะไม่เริ่มเลย"',s:'— ภาษิตจีน'},
+  {t:'"ฝึกฝนวันนี้<br>เพื่อพรุ่งนี้จะไม่ต้องเสียใจ"',s:'— แรงบันดาลใจ'},
+  {t:'"صَلِّ قَبْلَ أَنْ يُصَلَّى عَلَيْكَ<br>ละหมาดก่อนที่จะมีการละหมาดเพื่อเจ้า"',s:'— ฮะดีษ'},
+  {t:'"ไม่มีใครประสบความสำเร็จ<br>โดยไม่เคยล้มเหลว"',s:'— แรงบันดาลใจ'},
+];
+const PET_MOODS={
+  happy:['ทำดีมาก! ⭐','ขอบคุณนะ! 💙','คุณเก่งมาก! 🌟','ยังไงก็สู้ต่อ! 💪'],
+  normal:['มีอะไรให้ช่วยไหม? 🐱','วันนี้เป็นยังไงบ้าง?','ฉันอยู่ตรงนี้นะ 😊','จะสู้ๆ นะ! 💪'],
+  sleepy:['ง่วงจัง... 😴','กี่โมงแล้วเนี่ย...','zzz... 💤'],
+  excited:['ว้าว! เจ๋งมาก!! ✨','Streak สูงมากเลย! 🔥','ไปต่อเลย! 🚀','ภูมิใจในตัวคุณ! 💖'],
+};
+
+const DAYS_TH=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const MONTHS_TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+// ===== STATE =====
+let profile=JSON.parse(localStorage.getItem('profile')||JSON.stringify(DEFAULT_PROFILE));
+let routine=JSON.parse(localStorage.getItem('routine')||JSON.stringify(DEFAULT_ROUTINE));
+let prayerState={},habitState={};
+let qIdx=0,selectedMood='😊';
+let petFrames=0,petBlink=0,petJump=0,petAnimId=null;
+let audioCtx=null;
+let currentPage=0;
+const TOTAL_PAGES=6;
+
+function todayKey(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function loadDay(){prayerState=JSON.parse(localStorage.getItem('pray_'+todayKey())||'{}');habitState=JSON.parse(localStorage.getItem('habit_'+todayKey())||'{}');}
+
+// ===== FRIENDLY DATE FORMAT =====
+function friendlyDate(isoStr){
+  // isoStr = "2025-07-01"
+  const parts=isoStr.split('-');
+  const d=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+  return`วัน${DAYS_TH[d.getDay()]}ที่ ${d.getDate()} ${MONTHS_TH[d.getMonth()]} ${d.getFullYear()+543}`;
+}
+
+// ===== XP / LEVEL =====
+// XP คำนวณจาก snapshot ของสิ่งที่ทำจริงแต่ละวัน ป้องกันการปั้มเลเวล
+function calcTodayXP(){
+  const today=todayKey();
+  const prayers=JSON.parse(localStorage.getItem('pray_'+today)||'{}');
+  const habits=JSON.parse(localStorage.getItem('habit_'+today)||'{}');
+  const hasJournal=JSON.parse(localStorage.getItem('journal')||'[]').some(e=>e.date===today);
+  const prayerXP=Object.values(prayers).filter(Boolean).length * PRAYER_XP;
+  const habitXP=Object.values(habits).filter(Boolean).length * HABIT_XP;
+  const journalXP=hasJournal?JOURNAL_XP:0;
+  return prayerXP+habitXP+journalXP;
+}
+
+function recalcTotalXP(){
+  // รวม XP ทุกวันที่มีในประวัติ (ไม่รวม today — จะเพิ่มแยก)
+  let total=0;
+  // วนทุก key ใน localStorage ที่เป็น pray_ หรือ habit_
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(key&&key.startsWith('pray_')){
+      const day=key.replace('pray_','');
+      const prayers=JSON.parse(localStorage.getItem(key)||'{}');
+      total+=Object.values(prayers).filter(Boolean).length * PRAYER_XP;
+    }
+    if(key&&key.startsWith('habit_')){
+      const day=key.replace('habit_','');
+      const habits=JSON.parse(localStorage.getItem(key)||'{}');
+      total+=Object.values(habits).filter(Boolean).length * HABIT_XP;
+    }
+  }
+  // journal XP
+  const journal=JSON.parse(localStorage.getItem('journal')||'[]');
+  total+=journal.length * JOURNAL_XP;
+  return total;
+}
+
+function getXP(){return recalcTotalXP();}
+
+function refreshXP(showLevelUp=true){
+  const prev=parseInt(localStorage.getItem('_lastKnownXP')||'0');
+  const prevLevel=getLevelData(prev).idx;
+  const newXP=recalcTotalXP();
+  localStorage.setItem('_lastKnownXP',newXP);
+  const newLevel=getLevelData(newXP).idx;
+  renderXPBar();
+  if(showLevelUp&&newLevel>prevLevel){
+    const ld=getLevelData(newXP);
+    setTimeout(()=>showLevelSplash(ld.idx+1,ld.name),600);
+  }
+}
+function getLevelData(xp){let idx=0;for(let i=0;i<LEVELS.length;i++){if(xp>=LEVELS[i].min)idx=i;}return{...LEVELS[idx],idx};}
+function renderXPBar(){
+  const xp=recalcTotalXP();const ld=getLevelData(xp);const nextLevel=LEVELS[ld.idx+1];
+  document.getElementById('levelBadge').textContent=`${ld.emoji} Lv.${ld.idx+1}`;
+  if(nextLevel){const pct=Math.round(((xp-ld.min)/(nextLevel.min-ld.min))*100);document.getElementById('xpBarFill').style.width=pct+'%';document.getElementById('xpText').textContent=`${xp}/${nextLevel.min} XP`;}
+  else{document.getElementById('xpBarFill').style.width='100%';document.getElementById('xpText').textContent=`MAX`;}
+  document.getElementById('xpToday').textContent=calcTodayXP();
+}
+function showLevelSplash(lvl,name){document.getElementById('lvlNum').textContent=lvl;document.getElementById('lvlName').textContent=name;document.getElementById('levelSplash').classList.add('show');playLevelUp();}
+function closeLevelSplash(){document.getElementById('levelSplash').classList.remove('show');}
+
+// ===== AUDIO =====
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+function playTone(freqs){if(localStorage.getItem('soundOn')!=='1')return;try{initAudio();freqs.forEach(([f,s,d])=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type='sine';const t=audioCtx.currentTime+s;g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.start(t);o.stop(t+d);});}catch(e){}}
+function playSuccess(){playTone([[523,0,.2],[659,.1,.2],[784,.2,.3]]);}
+function playPrayer(){playTone([[440,0,.35],[550,.25,.35],[440,.5,.25]]);}
+function playLevelUp(){playTone([[523,0,.15],[659,.1,.15],[784,.2,.15],[1047,.35,.5]]);}
+function toggleSound(){initAudio();const on=localStorage.getItem('soundOn')==='1';localStorage.setItem('soundOn',on?'0':'1');updateSoundUI(!on);if(!on)playSuccess();}
+function updateSoundUI(on){document.getElementById('soundTrack').className='toggle-track'+(on?' on':'');document.getElementById('soundKnob').className='toggle-knob'+(on?' on':'');}
+
+// ===== CLOCK =====
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock').textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('dateDisplay').textContent=`วัน${DAYS_TH[now.getDay()]}ที่ ${now.getDate()} ${MONTHS_TH[now.getMonth()]} ${now.getFullYear()+543}`;
+  updateCurrentTask(now);
+}
+
+// ===== CURRENT TASK =====
+function t2m(s){const[h,m]=s.split(':').map(Number);return h*60+m;}
+function updateCurrentTask(now){
+  if(!now)now=new Date();
+  const cur=now.getHours()*60+now.getMinutes();
+  const sorted=[...routine].sort((a,b)=>t2m(a.h)-t2m(b.h));
+  let ci=-1;
+  for(let i=0;i<sorted.length;i++){const nt=i+1<sorted.length?t2m(sorted[i+1].h):1440;if(cur>=t2m(sorted[i].h)&&cur<nt){ci=i;break;}}
+  if(ci===-1&&cur>=t2m(sorted[sorted.length-1].h))ci=sorted.length-1;
+  const current=ci>=0?sorted[ci]:null;
+  const next=ci>=0&&ci+1<sorted.length?sorted[ci+1]:(ci===-1?sorted[0]:null);
+  document.getElementById('curTime').textContent=current?current.h:'--:--';
+  document.getElementById('curTask').textContent=current?current.t:'ยังไม่ถึงกิจกรรมแรก';
+  if(next){document.getElementById('nextTask').textContent=next.t;document.getElementById('nextTime').textContent=next.h;document.getElementById('nextWrap').style.display='';}
+  else document.getElementById('nextWrap').style.display='none';
+}
+
+// ===== PRAYERS =====
+function renderPrayers(){
+  document.getElementById('prayerGrid').innerHTML=PRAYERS_DATA.map(p=>{
+    const done=prayerState[p.id];
+    return`<div class="prayer-item${done?' done':''}" onclick="togglePrayer('${p.id}')"><div class="prayer-name">${p.name}</div><div class="prayer-time">${p.time}</div><div class="prayer-emoji">${done?'✅':'⬜'}</div></div>`;
+  }).join('');
+  const cnt=Object.values(prayerState).filter(Boolean).length;
+  document.getElementById('prayerStat').textContent=cnt+'/5';
+}
+function togglePrayer(id){
+  const was=prayerState[id];prayerState[id]=!was;
+  localStorage.setItem('pray_'+todayKey(),JSON.stringify(prayerState));
+  if(!was){playPrayer();addXP(PRAYER_XP);showToast(`🕌 ละหมาดแล้ว! +${PRAYER_XP} XP`);}
+  renderPrayers();
+}
+
+// ===== HABITS =====
+function renderHabits(){
+  document.getElementById('habitList').innerHTML=HABITS_DATA.map((h,i)=>{
+    const done=habitState[i];
+    return`<div class="habit-item"><div class="habit-toggle${done?' checked':''}" onclick="toggleHabit(${i})">${done?'✓':''}</div><div class="habit-name${done?' done':''}">${h}</div><div class="habit-xp">+${HABIT_XP} XP</div></div>`;
+  }).join('');
+  const cnt=Object.values(habitState).filter(Boolean).length;
+  document.getElementById('habitCount').textContent=cnt+'/'+HABITS_DATA.length;
+}
+function toggleHabit(i){
+  const was=habitState[i];habitState[i]=!was;
+  localStorage.setItem('habit_'+todayKey(),JSON.stringify(habitState));
+  if(!was){playSuccess();addXP(HABIT_XP);showToast(`✅ +${HABIT_XP} XP!`);}
+  renderHabits();
+}
+
+// ===== HABIT GRAPH =====
+function renderHabitGraph(){
+  const wrap=document.getElementById('habitGraph');
+  const days=['อา','จ','อ','พ','พฤ','ศ','ส'];
+  let html='';
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const hs=JSON.parse(localStorage.getItem('habit_'+k)||'{}');
+    const cnt=Object.values(hs).filter(Boolean).length;
+    const pct=Math.round((cnt/HABITS_DATA.length)*100);
+    const color=pct>=80?'var(--accent2)':pct>=50?'var(--accent)':'var(--accent3)';
+    const isToday=i===0;
+    html+=`<div class="graph-bar-wrap"><div class="graph-bar" style="height:54px"><div class="graph-bar-fill" style="height:${pct}%;background:${color};${isToday?'box-shadow:0 0 8px rgba(0,229,176,.3)':''}"></div></div><div class="graph-day" style="${isToday?'color:var(--text);font-weight:600':''}">${isToday?'วันนี้':days[d.getDay()]}</div></div>`;
+  }
+  wrap.innerHTML=html;
+}
+
+// ===== JOURNAL =====
+function setMood(m,btn){
+  selectedMood=m;
+  document.getElementById('selectedMood').textContent='Mood: '+m;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn)btn.classList.add('selected');
+}
+function saveJournal(){
+  const text=document.getElementById('journalInput').value.trim();
+  if(!text){showToast('⚠️ กรุณาเขียนบางอย่างก่อน');return;}
+  const entries=JSON.parse(localStorage.getItem('journal')||'[]');
+  const today=todayKey();
+  const existing=entries.findIndex(e=>e.date===today);
+  const entry={date:today,mood:selectedMood,text};
+  if(existing>=0)entries[existing]=entry;else entries.unshift(entry);
+  if(entries.length>30)entries.pop();
+  localStorage.setItem('journal',JSON.stringify(entries));
+  document.getElementById('journalInput').value='';
+  addXP(JOURNAL_XP);showToast(`📓 บันทึกแล้ว! +${JOURNAL_XP} XP`);playSuccess();renderJournal();
+}
+function renderJournal(){
+  const entries=JSON.parse(localStorage.getItem('journal')||'[]');
+  const list=document.getElementById('journalList');
+  if(!entries.length){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">ยังไม่มีบันทึก</div><div class="empty-sub">เริ่มเขียนวันนี้เลย<br>บันทึกความรู้สึกและสิ่งที่เกิดขึ้น</div></div>`;
+    return;
+  }
+  list.innerHTML=entries.map(e=>`<div class="journal-entry"><div class="journal-date">${friendlyDate(e.date)}</div><div class="journal-mood-text"><span class="journal-mood">${e.mood}</span><span class="journal-text">${e.text}</span></div></div>`).join('');
+}
+
+// ===== COUNTDOWN =====
+function addCountdown(){
+  const name=document.getElementById('cd-name').value.trim();
+  const date=document.getElementById('cd-date').value;
+  if(!name||!date){showToast('⚠️ กรอกข้อมูลให้ครบ');return;}
+  const cds=JSON.parse(localStorage.getItem('countdowns')||'[]');
+  cds.push({id:Date.now(),name,date});
+  localStorage.setItem('countdowns',JSON.stringify(cds));
+  document.getElementById('cd-name').value='';document.getElementById('cd-date').value='';
+  renderCountdowns();showToast('✅ เพิ่ม Countdown แล้ว!');
+}
+function deleteCountdown(id){
+  let cds=JSON.parse(localStorage.getItem('countdowns')||'[]');
+  cds=cds.filter(c=>c.id!==id);
+  localStorage.setItem('countdowns',JSON.stringify(cds));renderCountdowns();
+}
+function renderCountdowns(){
+  const cds=JSON.parse(localStorage.getItem('countdowns')||'[]');
+  const list=document.getElementById('countdownList');
+  if(!cds.length){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-title">ยังไม่มี Countdown</div><div class="empty-sub">เพิ่มวันสำคัญเพื่อติดตาม<br>เช่น วันสอบ วันเปิดเทอม</div></div>`;
+    return;
+  }
+  const now=new Date();now.setHours(0,0,0,0);
+  list.innerHTML=cds.sort((a,b)=>new Date(a.date)-new Date(b.date)).map(c=>{
+    const target=new Date(c.date);target.setHours(0,0,0,0);
+    const diff=Math.round((target-now)/(1000*60*60*24));
+    const color=diff<=3?'var(--pink)':diff<=7?'var(--gold)':'var(--accent2)';
+    const dayLabel=diff<0?'เสร็จแล้ว':diff===0?'วันนี้!':'วัน';
+    return`<div class="countdown-item">
+      <div class="countdown-days-wrap">
+        <div class="countdown-days" style="color:${color}">${diff<0?'✅':diff}</div>
+        <div class="countdown-days-label">${dayLabel}</div>
+      </div>
+      <div class="countdown-info">
+        <div class="countdown-name">${c.name}</div>
+        <div class="countdown-date">${diff<0?'เสร็จแล้ว!':diff===0?'วันนี้!':friendlyDate(c.date)}</div>
+      </div>
+      <button class="countdown-del" onclick="deleteCountdown(${c.id})">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ===== STREAK =====
+function checkStreak(){
+  const today=todayKey();const last=localStorage.getItem('lastLogin');
+  let streak=parseInt(localStorage.getItem('streak')||'0');
+  let hist=JSON.parse(localStorage.getItem('streakHist')||'[]');let isNew=false;
+  if(last!==today){
+    const yest=new Date();yest.setDate(yest.getDate()-1);
+    const yKey=`${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+    streak=last===yKey?streak+1:1;
+    localStorage.setItem('streak',streak);localStorage.setItem('lastLogin',today);
+    if(!hist.includes(today)){hist.push(today);if(hist.length>28)hist.shift();}
+    localStorage.setItem('streakHist',JSON.stringify(hist));isNew=true;
+  }
+  ['streakNum','streakBig','streakStatNum'].forEach(id=>document.getElementById(id).textContent=streak);
+  document.getElementById('streakText').textContent=streak>1?`วันติดต่อกัน 🎉`:'วันแรก — ไปต่อ!';
+  renderStreakCal(hist);
+  if(isNew)setTimeout(()=>showStreakSplash(streak),800);
+}
+function renderStreakCal(hist){
+  const today=todayKey();let html='';
+  for(let i=20;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    let cls='s-day';if(k===today)cls+=' today-day';else if(hist.includes(k))cls+=' active';
+    html+=`<div class="${cls}">${d.getDate()}</div>`;
+  }
+  document.getElementById('streakCal').innerHTML=html;
+}
+
+// ===== STREAK SPLASH =====
+function showStreakSplash(streak){
+  const splash=document.getElementById('streakSplash');
+  const bigFire=document.getElementById('bigFire');
+  const numEl=document.getElementById('splashNum');
+  const sub=document.getElementById('splashSub');
+  if(streak===1)sub.textContent='วันแรก — เริ่มต้นแล้ว! 🌟';
+  else if(streak>=30)sub.textContent='ตำนาน! ไม่หยุดแน่นอน 🏆';
+  else if(streak>=7)sub.textContent='สัปดาห์ต่อสัปดาห์! 💪';
+  else sub.textContent='รักษาไฟนี้ไว้!';
+  bigFire.className='big-fire fire-off';numEl.className='splash-num';numEl.textContent='0';
+  splash.classList.add('show');
+  setTimeout(()=>{bigFire.className='big-fire fire-igniting';spawnSparks();setTimeout(()=>{bigFire.className='big-fire fire-lit';numEl.className='splash-num show';countUp(numEl,0,streak,800);},600);},700);
+}
+function countUp(el,from,to,dur){const start=performance.now();function step(now){const p=Math.min((now-start)/dur,1);const e=1-Math.pow(1-p,3);el.textContent=Math.round(from+(to-from)*e);if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+function spawnSparks(){
+  const splash=document.getElementById('streakSplash');const colors=['#ff8c00','#ffcc00','#ff4500','#ffe000','#ff6b35'];
+  for(let i=0;i<18;i++){setTimeout(()=>{const s=document.createElement('div');s.className='spark';const angle=Math.random()*360,dist=70+Math.random()*110;const tx=`translateX(${Math.cos(angle*Math.PI/180)*dist}px)`;const ty=`translateY(${Math.sin(angle*Math.PI/180)*dist-70}px)`;s.style.cssText=`left:calc(50% - 3px);top:38%;background:${colors[Math.floor(Math.random()*colors.length)]};--tx:${tx};--ty:${ty};animation:sparkFly ${.5+Math.random()*.7}s ease-out forwards;width:${4+Math.random()*5}px;height:${4+Math.random()*5}px;`;splash.appendChild(s);setTimeout(()=>s.remove(),1300);},i*45);}
+}
+function closeSplash(){const s=document.getElementById('streakSplash');s.style.opacity='0';setTimeout(()=>{s.classList.remove('show');s.style.opacity='';},400);}
+
+// ===== ANIME PET =====
+function getPetMood(){const streak=parseInt(localStorage.getItem('streak')||'0');const habits=Object.values(habitState).filter(Boolean).length;const hr=new Date().getHours();if(hr>=22||hr<6)return'sleepy';if(streak>=7||habits>=6)return'excited';if(habits>=3)return'happy';return'normal';}
+function drawPet(ctx,frame,mood,blink,jy){
+  ctx.clearRect(0,0,76,76);const x=38,y=40+jy;
+  ctx.save();ctx.globalAlpha=.18;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(x,72,15,4,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  const bc=mood==='sleepy'?'#7a7aa0':mood==='excited'?'#b088ff':'#9b7ff5';
+  ctx.fillStyle=bc;ctx.beginPath();ctx.ellipse(x,y+7,15,11,0,0,Math.PI*2);ctx.fill();
+  const ts=Math.sin(frame*.08)*7;ctx.strokeStyle=bc;ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x+13,y+11);ctx.quadraticCurveTo(x+26+ts,y+16,x+22+ts,y+3);ctx.stroke();
+  ctx.fillStyle=bc;ctx.beginPath();ctx.ellipse(x,y-10,13,12,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=bc;ctx.beginPath();ctx.moveTo(x-11,y-19);ctx.lineTo(x-17,y-30);ctx.lineTo(x-5,y-22);ctx.fill();ctx.beginPath();ctx.moveTo(x+11,y-19);ctx.lineTo(x+17,y-30);ctx.lineTo(x+5,y-22);ctx.fill();
+  ctx.fillStyle='#ffb3d9';ctx.beginPath();ctx.moveTo(x-10,y-21);ctx.lineTo(x-15,y-29);ctx.lineTo(x-6,y-23);ctx.fill();ctx.beginPath();ctx.moveTo(x+10,y-21);ctx.lineTo(x+15,y-29);ctx.lineTo(x+6,y-23);ctx.fill();
+  const ey=y-11;
+  if(blink){ctx.strokeStyle='#1a1230';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-6,ey);ctx.lineTo(x-3,ey);ctx.stroke();ctx.beginPath();ctx.moveTo(x+3,ey);ctx.lineTo(x+6,ey);ctx.stroke();}
+  else if(mood==='sleepy'){ctx.strokeStyle='#1a1230';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x-4,ey,2.5,Math.PI,0);ctx.stroke();ctx.beginPath();ctx.arc(x+4,ey,2.5,Math.PI,0);ctx.stroke();}
+  else if(mood==='excited'){ctx.fillStyle='#ffe000';dStar(ctx,x-4,ey,3.5,1.8,5);dStar(ctx,x+4,ey,3.5,1.8,5);}
+  else{ctx.fillStyle='#1a1230';ctx.beginPath();ctx.ellipse(x-4,ey,3,3,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(x+4,ey,3,3,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,.7)';ctx.beginPath();ctx.ellipse(x-3,ey-1,1,1,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(x+5,ey-1,1,1,0,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle='#ffb3d9';ctx.beginPath();ctx.moveTo(x,y-5);ctx.lineTo(x-2,y-3);ctx.lineTo(x+2,y-3);ctx.fill();
+  ctx.strokeStyle='#1a1230';ctx.lineWidth=1.5;
+  if(mood==='happy'||mood==='excited'){ctx.beginPath();ctx.arc(x-2,y-2,1.8,0,Math.PI);ctx.stroke();ctx.beginPath();ctx.arc(x+2,y-2,1.8,0,Math.PI);ctx.stroke();}
+  else if(mood==='sleepy'){ctx.beginPath();ctx.moveTo(x-3,y-2);ctx.lineTo(x+3,y-2);ctx.stroke();}
+  else{ctx.beginPath();ctx.arc(x,y-2,2.5,.1,Math.PI-.1);ctx.stroke();}
+  if(mood==='happy'||mood==='excited'){ctx.fillStyle='rgba(255,100,150,.22)';ctx.beginPath();ctx.ellipse(x-8,y-6,3.5,2.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(x+8,y-6,3.5,2.5,0,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle=bc;ctx.beginPath();ctx.ellipse(x-9,y+17,4.5,3.5,-.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(x+9,y+17,4.5,3.5,.3,0,Math.PI*2);ctx.fill();
+  if(mood==='sleepy'){ctx.fillStyle='rgba(180,180,220,.75)';ctx.font='bold 9px Kanit,sans-serif';ctx.fillText('z',x+15,y-20);ctx.font='bold 7px Kanit,sans-serif';ctx.fillText('z',x+20,y-26);ctx.font='bold 5px Kanit,sans-serif';ctx.fillText('z',x+24,y-31);}
+}
+function dStar(ctx,cx,cy,or,ir,pts){ctx.beginPath();for(let i=0;i<pts*2;i++){const r=i%2===0?or:ir;const a=(i*Math.PI/pts)-Math.PI/2;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}ctx.closePath();ctx.fill();}
+function animatePet(){const canvas=document.getElementById('petCanvas');const ctx=canvas.getContext('2d');petFrames++;petBlink++;petJump++;const blink=petBlink>120&&petBlink<124;if(petBlink>138)petBlink=0;const jy=Math.sin(petJump*.04)*1.8;drawPet(ctx,petFrames,getPetMood(),blink,jy);petAnimId=requestAnimationFrame(animatePet);}
+function petTap(){const mood=getPetMood();const msgs=PET_MOODS[mood]||PET_MOODS.normal;const msg=msgs[Math.floor(Math.random()*msgs.length)];const b=document.getElementById('petBubble');b.textContent=msg;b.classList.add('show');b.style.animation='none';b.offsetHeight;b.style.animation='bubblePop .25s cubic-bezier(.34,1.56,.64,1)';clearTimeout(petTap._t);petTap._t=setTimeout(()=>b.classList.remove('show'),3000);playSuccess();}
+
+// ===== QUOTE =====
+let qTimer;
+function rotateQuote(){qIdx=(qIdx+1)%QUOTES.length;document.getElementById('quoteText').innerHTML=QUOTES[qIdx].t;document.getElementById('quoteSource').textContent=QUOTES[qIdx].s;}
+
+// ===== ROUTINE =====
+function renderRoutineEdit(){document.getElementById('routineEditList').innerHTML=routine.map((r,i)=>`<div class="routine-edit-item"><input class="time-input" type="time" value="${r.h}" id="rh${i}"><input class="task-input" type="text" value="${r.t}" id="rt${i}" placeholder="กิจกรรม"><button class="del-btn" onclick="delRoutine(${i})">×</button></div>`).join('');}
+function addRoutine(){routine.push({h:'12:00',t:'กิจกรรมใหม่'});renderRoutineEdit();}
+function delRoutine(i){routine.splice(i,1);renderRoutineEdit();}
+function saveRoutine(){
+  const rows=document.querySelectorAll('.routine-edit-item');
+  routine=Array.from(rows).map((_,i)=>({h:document.getElementById('rh'+i).value,t:document.getElementById('rt'+i).value})).filter(r=>r.h&&r.t);
+  routine.sort((a,b)=>t2m(a.h)-t2m(b.h));
+  localStorage.setItem('routine',JSON.stringify(routine));
+  renderRoutineEdit();updateCurrentTask();
+  if(localStorage.getItem('notifOn')==='1')scheduleNotifs();
+  showToast('✅ บันทึก Routine แล้ว!');
+}
+
+// ===== PROFILE =====
+function renderProfile(){
+  document.getElementById('headerName').textContent=profile.name||'MyDash';
+  document.getElementById('profileView').innerHTML=[['ชื่อ',profile.name],['อายุ',profile.age],['มหา\'ลัย',profile.uni],['สาขา',profile.faculty],['ศาสนา',profile.religion],['เงินเก็บ',profile.savings],['รายได้',profile.income],['เป้าเงิน',profile.moneygoal],...(profile.notes?[['โน้ต',profile.notes]]:[])].map(([l,v])=>`<div class="profile-item"><div class="profile-label">${l}</div><div class="profile-value">${v||'—'}</div></div>`).join('');
+}
+function openProfileModal(){['name','age','uni','faculty','religion','savings','income','moneygoal','notes'].forEach(k=>{document.getElementById('f-'+k).value=profile[k]||'';});openModal('profileModal');}
+function saveProfile(){['name','age','uni','faculty','religion','savings','income','moneygoal','notes'].forEach(k=>{profile[k]=document.getElementById('f-'+k).value;});if(!profile.name)profile.name=DEFAULT_PROFILE.name;localStorage.setItem('profile',JSON.stringify(profile));closeModal('profileModal');renderProfile();showToast('✅ บันทึกโปรไฟล์แล้ว!');playSuccess();}
+
+// ===== NOTIFICATIONS =====
+function requestNotif(){if(!('Notification'in window)){showToast('❌ ไม่รองรับ');return;}Notification.requestPermission().then(p=>{if(p==='granted'){localStorage.setItem('notifOn','1');document.getElementById('notifText').textContent='✅ เปิดแล้ว';scheduleNotifs();showToast('✅ เปิดแล้ว!');}else showToast('❌ ไม่ได้รับอนุญาต');});}
+function scheduleNotifs(){if(Notification.permission!=='granted')return;routine.forEach(r=>{const[h,m]=r.h.split(':').map(Number);const now=new Date();const target=new Date();target.setHours(h,m,0,0);const delay=target-now;if(delay>0)setTimeout(()=>{new Notification('⏰ MyDash — '+r.t,{icon:'icons/icon-192.png'});},delay);});}
+
+// ===== MODAL =====
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModalOut(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+
+// ===== SWIPEABLE PAGE NAVIGATION =====
+const PAGE_IDS=['today','goals','habits','journal','countdown','settings'];
+
+function goPage(idx,btn,animate=true){
+  if(idx<0||idx>=TOTAL_PAGES)return;
+  currentPage=idx;
+  const wrap=document.getElementById('pagesWrap');
+  if(!animate){wrap.classList.add('no-transition');requestAnimationFrame(()=>{wrap.classList.remove('no-transition');});}
+  wrap.style.transform=`translateX(${-idx*100}%)`;
+
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{b.classList.toggle('active',i===idx);});
+
+  // Update swipe dots
+  document.querySelectorAll('.swipe-dot').forEach((d,i)=>{d.classList.toggle('active',i===idx);});
+}
+
+// Touch swipe support
+(function setupSwipe(){
+  const area=document.getElementById('contentArea');
+  let startX=0,startY=0,startT=0,dragging=false,startPage=0;
+  area.addEventListener('touchstart',e=>{
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+    startT=Date.now();dragging=true;startPage=currentPage;
+  },{passive:true});
+
+  area.addEventListener('touchmove',e=>{
+    if(!dragging)return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=e.touches[0].clientY-startY;
+    // Only horizontal swipe if more horizontal than vertical
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>8){
+      const wrap=document.getElementById('pagesWrap');
+      wrap.classList.add('no-transition');
+      const offset=(-startPage*100)+((dx/window.innerWidth)*100);
+      const clamped=Math.max(-((TOTAL_PAGES-1)*100),Math.min(0,offset));
+      wrap.style.transform=`translateX(${clamped}%)`;
+      wrap.classList.remove('no-transition');
+    }
+  },{passive:true});
+
+  area.addEventListener('touchend',e=>{
+    if(!dragging)return;dragging=false;
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    const dt=Date.now()-startT;
+    const isHorizontal=Math.abs(dx)>Math.abs(dy);
+    const isFast=dt<300;
+    const threshold=isFast?40:window.innerWidth*0.3;
+    if(isHorizontal&&Math.abs(dx)>threshold){
+      if(dx<0)goPage(Math.min(currentPage+1,TOTAL_PAGES-1),null);
+      else goPage(Math.max(currentPage-1,0),null);
+    } else {
+      goPage(currentPage,null); // snap back
+    }
+  },{passive:true});
+})();
+
+// ===== TOAST =====
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ===== INIT =====
+function init(){
+  loadDay();checkStreak();
+  qIdx=Math.floor(Math.random()*QUOTES.length);
+  document.getElementById('quoteText').innerHTML=QUOTES[qIdx].t;
+  document.getElementById('quoteSource').textContent=QUOTES[qIdx].s;
+  setInterval(rotateQuote,18000);
+  renderProfile();renderPrayers();renderHabits();renderHabitGraph();
+  renderRoutineEdit();renderJournal();renderCountdowns();
+  renderXPBar();updateClock();
+  // Sync clock on the minute boundary
+  const now=new Date();
+  setTimeout(()=>{updateClock();setInterval(updateClock,60000);},(60-now.getSeconds())*1000);
+  updateSoundUI(localStorage.getItem('soundOn')==='1');
+  if(localStorage.getItem('notifOn')==='1'&&typeof Notification!=='undefined'&&Notification.permission==='granted'){document.getElementById('notifText').textContent='✅ เปิดแล้ว';scheduleNotifs();}
+  animatePet();
+  if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+init();
+</script>
+</body>
+</html>
